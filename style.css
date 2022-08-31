@@ -7,3 +7,6 @@ canvas {
   display: block;
   touch-action: manipulation;
 }
+button {
+  border-color: #000;
+}

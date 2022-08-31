@@ -192,7 +192,7 @@ function draw() {
       strokeWeight(2);
       for (let y = 0; y < maxGuesses; y++) {
         for (let x = 0; x < wordLength; x++) {
-          stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 127 : 63) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 127)) : 63)));
+          stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 191 : 91) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 191)) : 91)));
           fill(colors[y][x]);
           square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
         }
