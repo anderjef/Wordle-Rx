@@ -69,7 +69,7 @@ function setup() {
   lastWindowWidth = windowWidth;
   lastWindowHeight = windowHeight;
   displayOffset = lastWindowWidth / 2 - min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight) / 2;
-  canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)).style('display', 'block').position(displayOffset);
+  canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)).position(displayOffset);
   lastSecondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
   validWords += answers;
   for (let i = 0; i < maxGuesses; i++) {
@@ -115,41 +115,46 @@ function setup() {
     }
   }
   const screenDivision = width / numScreenDivisions;
-  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color("blue")).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
+  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
+  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color("blue")).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
-  keyboard[0].push(createButton("Q").mousePressed(pressedQ).style('color', color(255)).style('background-color', keyboardColors[ 0]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 0 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("W").mousePressed(pressedW).style('color', color(255)).style('background-color', keyboardColors[ 1]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("E").mousePressed(pressedE).style('color', color(255)).style('background-color', keyboardColors[ 2]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("R").mousePressed(pressedR).style('color', color(255)).style('background-color', keyboardColors[ 3]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("T").mousePressed(pressedT).style('color', color(255)).style('background-color', keyboardColors[ 4]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("Y").mousePressed(pressedY).style('color', color(255)).style('background-color', keyboardColors[ 5]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("U").mousePressed(pressedU).style('color', color(255)).style('background-color', keyboardColors[ 6]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("I").mousePressed(pressedI).style('color', color(255)).style('background-color', keyboardColors[ 7]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("O").mousePressed(pressedO).style('color', color(255)).style('background-color', keyboardColors[ 8]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 8 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("P").mousePressed(pressedP).style('color', color(255)).style('background-color', keyboardColors[ 9]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 9 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Q").mousePressed(function() { keyTyped("Q"); }).style('background-color', keyboardColors[ 0]).position(displayOffset + 0 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("W").mousePressed(function() { keyTyped("W"); }).style('background-color', keyboardColors[ 1]).position(displayOffset + 1 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("E").mousePressed(function() { keyTyped("E"); }).style('background-color', keyboardColors[ 2]).position(displayOffset + 2 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("R").mousePressed(function() { keyTyped("R"); }).style('background-color', keyboardColors[ 3]).position(displayOffset + 3 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("T").mousePressed(function() { keyTyped("T"); }).style('background-color', keyboardColors[ 4]).position(displayOffset + 4 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Y").mousePressed(function() { keyTyped("Y"); }).style('background-color', keyboardColors[ 5]).position(displayOffset + 5 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("U").mousePressed(function() { keyTyped("U"); }).style('background-color', keyboardColors[ 6]).position(displayOffset + 6 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("I").mousePressed(function() { keyTyped("I"); }).style('background-color', keyboardColors[ 7]).position(displayOffset + 7 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("O").mousePressed(function() { keyTyped("O"); }).style('background-color', keyboardColors[ 8]).position(displayOffset + 8 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("P").mousePressed(function() { keyTyped("P"); }).style('background-color', keyboardColors[ 9]).position(displayOffset + 9 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[1].push(createButton("A").mousePressed(pressedA).style('color', color(255)).style('background-color', keyboardColors[10]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 0.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("S").mousePressed(pressedS).style('color', color(255)).style('background-color', keyboardColors[11]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("D").mousePressed(pressedD).style('color', color(255)).style('background-color', keyboardColors[12]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("F").mousePressed(pressedF).style('color', color(255)).style('background-color', keyboardColors[13]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("G").mousePressed(pressedG).style('color', color(255)).style('background-color', keyboardColors[14]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("H").mousePressed(pressedH).style('color', color(255)).style('background-color', keyboardColors[15]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("J").mousePressed(pressedJ).style('color', color(255)).style('background-color', keyboardColors[16]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("K").mousePressed(pressedK).style('color', color(255)).style('background-color', keyboardColors[17]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("L").mousePressed(pressedL).style('color', color(255)).style('background-color', keyboardColors[18]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("A").mousePressed(function() { keyTyped("A"); }).style('background-color', keyboardColors[10]).position(displayOffset + 0.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("S").mousePressed(function() { keyTyped("S"); }).style('background-color', keyboardColors[11]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("D").mousePressed(function() { keyTyped("D"); }).style('background-color', keyboardColors[12]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("F").mousePressed(function() { keyTyped("F"); }).style('background-color', keyboardColors[13]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("G").mousePressed(function() { keyTyped("G"); }).style('background-color', keyboardColors[14]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("H").mousePressed(function() { keyTyped("H"); }).style('background-color', keyboardColors[15]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("J").mousePressed(function() { keyTyped("J"); }).style('background-color', keyboardColors[16]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("K").mousePressed(function() { keyTyped("K"); }).style('background-color', keyboardColors[17]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("L").mousePressed(function() { keyTyped("L"); }).style('background-color', keyboardColors[18]).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[2].push(createButton("Z").mousePressed(pressedZ).style('color', color(255)).style('background-color', keyboardColors[19]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("X").mousePressed(pressedX).style('color', color(255)).style('background-color', keyboardColors[20]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("C").mousePressed(pressedC).style('color', color(255)).style('background-color', keyboardColors[21]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("V").mousePressed(pressedV).style('color', color(255)).style('background-color', keyboardColors[22]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("B").mousePressed(pressedB).style('color', color(255)).style('background-color', keyboardColors[23]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("N").mousePressed(pressedN).style('color', color(255)).style('background-color', keyboardColors[24]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("M").mousePressed(pressedM).style('color', color(255)).style('background-color', keyboardColors[25]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, lastWindowHeight - letterButtonHeight);
-  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
+  keyboard[2].push(createButton("Z").mousePressed(function() { keyTyped("Z"); }).style('background-color', keyboardColors[19]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("X").mousePressed(function() { keyTyped("X"); }).style('background-color', keyboardColors[20]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("C").mousePressed(function() { keyTyped("C"); }).style('background-color', keyboardColors[21]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("V").mousePressed(function() { keyTyped("V"); }).style('background-color', keyboardColors[22]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("B").mousePressed(function() { keyTyped("B"); }).style('background-color', keyboardColors[23]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("N").mousePressed(function() { keyTyped("N"); }).style('background-color', keyboardColors[24]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("M").mousePressed(function() { keyTyped("M"); }).style('background-color', keyboardColors[25]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  for (let i = 0; i < keyboard.length; i++) {
+    for (let j = 0; j < keyboard[i].length; j++) {
+      keyboard[i][j].style('color', color(255)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, letterButtonHeight);
+    }
+  }
+  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, lastWindowHeight - letterButtonHeight);
+  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
   textAlign(CENTER, CENTER);
 }
 
@@ -231,8 +236,6 @@ function draw() {
       refreshSquares = true;
     }
     if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
-      lastWindowWidth = newWindowWidth;
-      lastWindowHeight = newWindowHeight;
       const letterButtonWidth = 7 * screenDivision;
       const letterButtonHeight = 10 * screenDivision;
       for (let i = 0; i < keyboard[0].length; i++) {
@@ -290,7 +293,7 @@ function draw() {
       textSize(4.5 * screenDivision);
     }
     const secondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
-    if (secondsUntilTomorrow != lastSecondsUntilTomorrow || refreshStats) {
+    if (secondsUntilTomorrow !== lastSecondsUntilTomorrow || refreshStats) {
       refreshStats = false;
       lastSecondsUntilTomorrow = secondsUntilTomorrow;
       const countdownHours = Math.floor(secondsUntilTomorrow / 3600);
@@ -304,35 +307,32 @@ function draw() {
   }
   switch (justEndedGameLoopCount) {
     case 0:
-      toggleStatsGUI(screenDivision);
+      setStatsGUI(screenDivision, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       break;
     case 1:
       toggleStats();
       statsButton.mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut); //re-enable statsButton interactions
       frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
-      toggleStatsGUI(screenDivision);
+      setStatsGUI(screenDivisionnewWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       justEndedGameLoopCount--;
       break;
     default:
-      statsButton.mousePressed(emptyFunction).mouseOver(emptyFunction).mouseOut(emptyFunction); //disable statsButton interaction during countdown/"animation"
+      statsButton.mousePressed(emptyFunction).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
       justEndedGameLoopCount--;
       break;
+  }
+  if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
+    lastWindowWidth = newWindowWidth;
+    lastWindowHeight = newWindowHeight;
   }
 }
 
 
-function toggleStatsGUI(screenDivision) {
-  statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
-  statsButton.html((stats ? "x" : "Stats"));
-  clipboardButton.style('display', (stats && gameOver ? '' : 'none'));
-  for (let i = 0; i < keyboard.length; i++) {
-    for (let j = 0; j < keyboard[i].length; j++) {
-      keyboard[i][j].style('display', (stats ? 'none' : ''));
-    }
+function setStatsGUI(screenDivision, scaleChanged) {
+  if (scaleChanged) {
+    statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
+    clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
   }
-  enterButton.style('display', (stats ? 'none' : ''));
-  backspaceButton.style('display', (stats ? 'none' : ''));
 }
 
 
@@ -446,19 +446,28 @@ function removeLetterFromGuess() {
 }
 
 
+function saveState() {
+  storeItem('wordle-rx-state', gameState);
+  if (gameState.gamesPlayed === 0 && gameState.previousGuesses.length === 0 && gameState.guess.length === 0) {
+    removeItem('wordle-rx-state');
+    removeItem('wordle-rx-statep5TypeID');
+  }
+}
+
+
 function keyPressed() {
   switch (keyCode) {
     case ENTER:
     case RETURN:
       if (!stats && !gameOver) {
         submitGuess();
-        storeItem('wordle-rx-state', gameState);
+        saveState();
       }
       break;
     case BACKSPACE:
       if (!stats && !gameOver) {
         removeLetterFromGuess();
-        storeItem('wordle-rx-state', gameState);
+        saveState();
       }
       break;
     case ESCAPE:
@@ -475,14 +484,14 @@ function pressedKey(key) {
     if (gameState.guess.length < wordLength) {
       gameState.guess += key.toUpperCase();
       //future consideration: show letter-appended-to-guess animation
-      storeItem('wordle-rx-state', gameState);
+      saveState();
     }
     refreshSquares = true;
   }
 }
 
 
-function keyTyped() {
+function keyTyped(k) {
   switch (key) {
     case 'a':
     case 'b':
@@ -540,6 +549,66 @@ function keyTyped() {
         pressedKey(key);
       }
       break;
+    default:
+      switch (k) {
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+        case 'g':
+        case 'h':
+        case 'i':
+        case 'j':
+        case 'k':
+        case 'l':
+        case 'm':
+        case 'n':
+        case 'o':
+        case 'p':
+        case 'q':
+        case 'r':
+        case 's':
+        case 't':
+        case 'u':
+        case 'v':
+        case 'w':
+        case 'x':
+        case 'y':
+        case 'z':
+        case 'A':
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'E':
+        case 'F':
+        case 'G':
+        case 'H':
+        case 'I':
+        case 'J':
+        case 'K':
+        case 'L':
+        case 'M':
+        case 'N':
+        case 'O':
+        case 'P':
+        case 'Q':
+        case 'R':
+        case 'S':
+        case 'T':
+        case 'U':
+        case 'V':
+        case 'W':
+        case 'X':
+        case 'Y':
+        case 'Z':
+          if (!stats && !gameOver) {
+            pressedKey(k);
+          }
+          break;
+      }
+      break;
   }
 }
 
@@ -548,6 +617,17 @@ function toggleStats() {
   stats = !stats;
   refreshSquares = !stats;
   refreshStats = stats;
+  lastWindowWidth = -1; //trigger resize of elements
+  lastWindowHeight = -1; //trigger resize of elements; redundant
+  statsButton.html((stats ? "x" : "Stats"));
+  clipboardButton.style('display', (stats && gameOver ? '' : 'none'));
+  for (let i = 0; i < keyboard.length; i++) {
+    for (let j = 0; j < keyboard[i].length; j++) {
+      keyboard[i][j].style('display', (stats ? 'none' : ''));
+    }
+  }
+  enterButton.style('display', (stats ? 'none' : ''));
+  backspaceButton.style('display', (stats ? 'none' : ''));
 }
 
 
@@ -572,31 +652,3 @@ function copyMouseOver() {
 function copyMouseOut() {
   clipboardButton.style('background-color', color("blue"));
 }
-
-
-function pressedQ() { pressedKey("Q"); }
-function pressedW() { pressedKey("W"); }
-function pressedE() { pressedKey("E"); }
-function pressedR() { pressedKey("R"); }
-function pressedT() { pressedKey("T"); }
-function pressedY() { pressedKey("Y"); }
-function pressedU() { pressedKey("U"); }
-function pressedI() { pressedKey("I"); }
-function pressedO() { pressedKey("O"); }
-function pressedP() { pressedKey("P"); }
-function pressedA() { pressedKey("A"); }
-function pressedS() { pressedKey("S"); }
-function pressedD() { pressedKey("D"); }
-function pressedF() { pressedKey("F"); }
-function pressedG() { pressedKey("G"); }
-function pressedH() { pressedKey("H"); }
-function pressedJ() { pressedKey("J"); }
-function pressedK() { pressedKey("K"); }
-function pressedL() { pressedKey("L"); }
-function pressedZ() { pressedKey("Z"); }
-function pressedX() { pressedKey("X"); }
-function pressedC() { pressedKey("C"); }
-function pressedV() { pressedKey("V"); }
-function pressedB() { pressedKey("B"); }
-function pressedN() { pressedKey("N"); }
-function pressedM() { pressedKey("M"); }
