@@ -116,7 +116,7 @@ function setup() {
   }
   const screenDivision = width / numScreenDivisions;
   statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color("blue")).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
+  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
@@ -189,7 +189,7 @@ function draw() {
     const letterSpaceMultiplier = 9;
     if (refreshSquares) {
       refreshSquares = false;
-      strokeWeight(2);
+      strokeWeight(3);
       for (let y = 0; y < maxGuesses; y++) {
         for (let x = 0; x < wordLength; x++) {
           stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 191 : 91) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 191)) : 91)));
@@ -313,7 +313,7 @@ function draw() {
       toggleStats();
       statsButton.mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut); //re-enable statsButton interactions
       frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
-      setStatsGUI(screenDivisionnewWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
+      setStatsGUI(screenDivision, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       justEndedGameLoopCount--;
       break;
     default:
@@ -384,7 +384,7 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
 
 
 function setClipboard() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
-  clipboardButton.style('background-color', color("blue")); //reset button background color to indicate button was pressed
+  clipboardButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
   let colorsJoined = "";
@@ -645,10 +645,10 @@ function emptyFunction() {}
 
 
 function copyMouseOver() {
-  clipboardButton.style('background-color', color(91, 91, 255));
+  clipboardButton.style('background-color', color(63, 127, 255));
 }
 
 
 function copyMouseOut() {
-  clipboardButton.style('background-color', color("blue"));
+  clipboardButton.style('background-color', color(0, 63, 255));
 }
