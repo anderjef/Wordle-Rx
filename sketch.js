@@ -37,6 +37,12 @@ const qwertyKeysToIndices = {
   N: 24,
   M: 25,
 };
+let lastWindowWidth, lastWindowHeight;
+let refreshSquares = true;
+let lastSecondsUntilTomorrow;
+let refreshStats = false;
+let canvas;
+let displayOffset = 0;
 
 let colors = [];
 let colorsForCopying = [];
@@ -54,13 +60,17 @@ let backspaceButton;
 
 
 function preload() {
-  validWords = loadStrings("valid words.txt"); //from https://raw.githubusercontent.com/tabatkins/wordle-list/main/words
+  validWords = loadStrings("valid words.txt"); //all words must be exactly wordLength long; from https://raw.githubusercontent.com/tabatkins/wordle-list/main/words
   answers = loadStrings("answers.txt");
 }
 
 
 function setup() {
-  createCanvas(min(canvasWindowWidthMultiplier * windowWidth, canvasWindowHeightMultiplier * windowHeight), min(canvasWindowWidthMultiplier * windowWidth, canvasWindowHeightMultiplier * windowHeight));
+  lastWindowWidth = windowWidth;
+  lastWindowHeight = windowHeight;
+  displayOffset = lastWindowWidth / 2 - min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight) / 2;
+  canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)).style('display', 'block').position(displayOffset);
+  lastSecondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
   validWords += answers;
   for (let i = 0; i < maxGuesses; i++) {
     colors.push([]);
@@ -105,78 +115,92 @@ function setup() {
     }
   }
   const screenDivision = width / numScreenDivisions;
-  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color("blue")).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(14 * screenDivision, 7 * screenDivision).position(width / 2 - 7 * screenDivision, height);
+  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
+  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color("blue")).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
-  keyboard[0].push(createButton("Q").mousePressed(pressedQ).style('color', color(255)).style('background-color', keyboardColors[ 0]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(0 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("W").mousePressed(pressedW).style('color', color(255)).style('background-color', keyboardColors[ 1]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(1 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("E").mousePressed(pressedE).style('color', color(255)).style('background-color', keyboardColors[ 2]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(2 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("R").mousePressed(pressedR).style('color', color(255)).style('background-color', keyboardColors[ 3]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(3 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("T").mousePressed(pressedT).style('color', color(255)).style('background-color', keyboardColors[ 4]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(4 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("Y").mousePressed(pressedY).style('color', color(255)).style('background-color', keyboardColors[ 5]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(5 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("U").mousePressed(pressedU).style('color', color(255)).style('background-color', keyboardColors[ 6]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(6 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("I").mousePressed(pressedI).style('color', color(255)).style('background-color', keyboardColors[ 7]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(7 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("O").mousePressed(pressedO).style('color', color(255)).style('background-color', keyboardColors[ 8]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(8 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("P").mousePressed(pressedP).style('color', color(255)).style('background-color', keyboardColors[ 9]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(9 * letterButtonWidth, windowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Q").mousePressed(pressedQ).style('color', color(255)).style('background-color', keyboardColors[ 0]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 0 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("W").mousePressed(pressedW).style('color', color(255)).style('background-color', keyboardColors[ 1]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("E").mousePressed(pressedE).style('color', color(255)).style('background-color', keyboardColors[ 2]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("R").mousePressed(pressedR).style('color', color(255)).style('background-color', keyboardColors[ 3]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("T").mousePressed(pressedT).style('color', color(255)).style('background-color', keyboardColors[ 4]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Y").mousePressed(pressedY).style('color', color(255)).style('background-color', keyboardColors[ 5]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("U").mousePressed(pressedU).style('color', color(255)).style('background-color', keyboardColors[ 6]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("I").mousePressed(pressedI).style('color', color(255)).style('background-color', keyboardColors[ 7]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("O").mousePressed(pressedO).style('color', color(255)).style('background-color', keyboardColors[ 8]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 8 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("P").mousePressed(pressedP).style('color', color(255)).style('background-color', keyboardColors[ 9]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 9 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[1].push(createButton("A").mousePressed(pressedA).style('color', color(255)).style('background-color', keyboardColors[10]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(0.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("S").mousePressed(pressedS).style('color', color(255)).style('background-color', keyboardColors[11]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(1.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("D").mousePressed(pressedD).style('color', color(255)).style('background-color', keyboardColors[12]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(2.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("F").mousePressed(pressedF).style('color', color(255)).style('background-color', keyboardColors[13]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(3.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("G").mousePressed(pressedG).style('color', color(255)).style('background-color', keyboardColors[14]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(4.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("H").mousePressed(pressedH).style('color', color(255)).style('background-color', keyboardColors[15]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(5.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("J").mousePressed(pressedJ).style('color', color(255)).style('background-color', keyboardColors[16]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(6.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("K").mousePressed(pressedK).style('color', color(255)).style('background-color', keyboardColors[17]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(7.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("L").mousePressed(pressedL).style('color', color(255)).style('background-color', keyboardColors[18]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(8.5 * letterButtonWidth, windowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("A").mousePressed(pressedA).style('color', color(255)).style('background-color', keyboardColors[10]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 0.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("S").mousePressed(pressedS).style('color', color(255)).style('background-color', keyboardColors[11]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("D").mousePressed(pressedD).style('color', color(255)).style('background-color', keyboardColors[12]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("F").mousePressed(pressedF).style('color', color(255)).style('background-color', keyboardColors[13]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("G").mousePressed(pressedG).style('color', color(255)).style('background-color', keyboardColors[14]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("H").mousePressed(pressedH).style('color', color(255)).style('background-color', keyboardColors[15]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("J").mousePressed(pressedJ).style('color', color(255)).style('background-color', keyboardColors[16]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("K").mousePressed(pressedK).style('color', color(255)).style('background-color', keyboardColors[17]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("L").mousePressed(pressedL).style('color', color(255)).style('background-color', keyboardColors[18]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[2].push(createButton("Z").mousePressed(pressedZ).style('color', color(255)).style('background-color', keyboardColors[19]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(1.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("X").mousePressed(pressedX).style('color', color(255)).style('background-color', keyboardColors[20]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(2.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("C").mousePressed(pressedC).style('color', color(255)).style('background-color', keyboardColors[21]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(3.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("V").mousePressed(pressedV).style('color', color(255)).style('background-color', keyboardColors[22]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(4.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("B").mousePressed(pressedB).style('color', color(255)).style('background-color', keyboardColors[23]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(5.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("N").mousePressed(pressedN).style('color', color(255)).style('background-color', keyboardColors[24]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(6.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("M").mousePressed(pressedM).style('color', color(255)).style('background-color', keyboardColors[25]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(7.5 * letterButtonWidth, windowHeight - letterButtonHeight));
-  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(0, windowHeight - letterButtonHeight);
-  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(8.5 * letterButtonWidth, windowHeight - letterButtonHeight);
+  keyboard[2].push(createButton("Z").mousePressed(pressedZ).style('color', color(255)).style('background-color', keyboardColors[19]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("X").mousePressed(pressedX).style('color', color(255)).style('background-color', keyboardColors[20]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("C").mousePressed(pressedC).style('color', color(255)).style('background-color', keyboardColors[21]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("V").mousePressed(pressedV).style('color', color(255)).style('background-color', keyboardColors[22]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("B").mousePressed(pressedB).style('color', color(255)).style('background-color', keyboardColors[23]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("N").mousePressed(pressedN).style('color', color(255)).style('background-color', keyboardColors[24]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("M").mousePressed(pressedM).style('color', color(255)).style('background-color', keyboardColors[25]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, lastWindowHeight - letterButtonHeight);
+  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
   textAlign(CENTER, CENTER);
 }
 
 
 function draw() {
-  resizeCanvas(min(canvasWindowWidthMultiplier * windowWidth, canvasWindowHeightMultiplier * windowHeight), min(canvasWindowWidthMultiplier * windowWidth, canvasWindowHeightMultiplier * windowHeight));
+  const newWindowWidth = windowWidth;
+  const newWindowHeight = windowHeight;
+  if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
+    resizeCanvas(min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight), min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight));
+    displayOffset = newWindowWidth / 2 - min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight) / 2;
+    canvas.position(displayOffset);
+    refreshSquares = !stats;
+    refreshStats = stats;
+  }
   maxFrameRate = floor(max(maxFrameRate, frameRate())); //must be set before call to frameRate(1.25) in case game is loaded to a completed game state to avoid a perpetually low frame rate
-  background(0);
+  if (refreshSquares || refreshStats) {
+    background(0);
+  }
   const screenDivision = width / numScreenDivisions;
   textSize((numScreenDivisions / 15) * screenDivision);
-  strokeWeight(1);
-  stroke(255);
-  fill(255);
-  text("Wordle Rx", width / 2, (numScreenDivisions / 16) * screenDivision);
+  if (refreshSquares || refreshStats || newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
+    stroke(255);
+    fill(255);
+    text("Wordle Rx", width / 2, (numScreenDivisions / 16) * screenDivision);
+  }
   if (!stats) {
     if (gameState.gameWon !== null && !gameOver) {
       gameOver = true;
       justEndedGameLoopCount = 2 + 2 * (!gameState.gameWon && popups.length); //extra time on loss for the user to read the answer popup
       frameRate(1.25); //found to be the only way to have the program show the game's end then the stats page shortly after (as opposed to a busy wait)
     }
-    strokeWeight(2);
     const letterSpaceMultiplier = 9;
-    for (let y = 0; y < maxGuesses; y++) {
-      for (let x = 0; x < wordLength; x++) {
-        stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 127 : 63) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 127)) : 63)));
-        fill(colors[y][x]);
-        square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
+    if (refreshSquares) {
+      refreshSquares = false;
+      strokeWeight(2);
+      for (let y = 0; y < maxGuesses; y++) {
+        for (let x = 0; x < wordLength; x++) {
+          stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 127 : 63) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 127)) : 63)));
+          fill(colors[y][x]);
+          square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
+        }
       }
-    }
-    stroke(255);
-    strokeWeight(1);
-    fill(255);
-    for (let i = 0; i < gameState.previousGuesses.length; i++) {
-      const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
-      for (let j = 0; j < wordLength; j++) {
-        const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + j * (letterSpaceMultiplier + 1)) * screenDivision;
-        text(gameState.previousGuesses[i][j], x, y);
+      strokeWeight(1);
+      stroke(255);
+      fill(255);
+      for (let i = 0; i < gameState.previousGuesses.length; i++) {
+        const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
+        for (let j = 0; j < wordLength; j++) {
+          const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + j * (letterSpaceMultiplier + 1)) * screenDivision;
+          text(gameState.previousGuesses[i][j], x, y);
+        }
       }
     }
     stroke((gameState.guess.length === wordLength && !validWords.includes(gameState.guess) ? color(127, 0, 0) : 255));
@@ -188,94 +212,118 @@ function draw() {
     }
     let numPopupsToDiscard = 0; //depends on popups being in order of decreasing age
     for (let i = 0; i < popups.length; i++) {
-      stroke(255);
-      fill(255);
-      rect(width / 2 - 7 * screenDivision, (5 + i * 6) * screenDivision, 14 * screenDivision, 4 * screenDivision, screenDivision / 2);
-      stroke(0);
-      fill(0);
-      textSize(1.5 * screenDivision);
       const label = Object.keys(popups[i])[0];
-      text(label, width / 2, (7 + i * 6) * screenDivision);
       if (Date.now() - popups[i][label] > 1000) { //popups expire after 1000 milliseconds
         numPopupsToDiscard = i + 1;
+      }
+      else {
+        stroke(255);
+        fill(255);
+        rect(width / 2 - 7 * screenDivision, (5 + (i - numPopupsToDiscard + 1) * 6) * screenDivision, 14 * screenDivision, 4 * screenDivision, screenDivision / 2);
+        stroke(0);
+        fill(0);
+        textSize(1.5 * screenDivision);
+        text(label, width / 2, (7 + (i - numPopupsToDiscard + 1) * 6) * screenDivision);
       }
     }
     if (numPopupsToDiscard > 0) {
       popups.splice(0, numPopupsToDiscard);
+      refreshSquares = true;
     }
-    const letterButtonWidth = 7 * screenDivision;
-    const letterButtonHeight = 10 * screenDivision;
-    for (let i = 0; i < keyboard[0].length; i++) {
-      keyboard[0][i].style('background-color', keyboardColors[i]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(i * letterButtonWidth, windowHeight - 3 * letterButtonHeight);
+    if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
+      lastWindowWidth = newWindowWidth;
+      lastWindowHeight = newWindowHeight;
+      const letterButtonWidth = 7 * screenDivision;
+      const letterButtonHeight = 10 * screenDivision;
+      for (let i = 0; i < keyboard[0].length; i++) {
+        keyboard[0][i].style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + i * letterButtonWidth, newWindowHeight - 3 * letterButtonHeight);
+      }
+      for (let i = 0; i < keyboard[1].length; i++) {
+        keyboard[1][i].style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + (0.5 + i) * letterButtonWidth, newWindowHeight - 2 * letterButtonHeight);
+      }
+      for (let i = 0; i < keyboard[2].length; i++) {
+        keyboard[2][i].style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position(displayOffset + (1.5 + i) * letterButtonWidth, newWindowHeight - letterButtonHeight);
+      }
+      enterButton.style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, newWindowHeight - letterButtonHeight);
+      backspaceButton.style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, newWindowHeight - letterButtonHeight);
     }
-    for (let i = 0; i < keyboard[1].length; i++) {
-      keyboard[1][i].style('background-color', keyboardColors[keyboard[0].length + i]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position((0.5 + i) * letterButtonWidth, windowHeight - 2 * letterButtonHeight);
+    for (let j = 0; j < keyboard.length; j++) {
+    const indexOffset = (j > 0 ? keyboard[0].length + (j > 1 ? keyboard[1].length : 0) : 0);
+      for (let i = 0; i < keyboard[j].length; i++) {
+        keyboard[j][i].style('background-color', keyboardColors[i + indexOffset]);
+      }
     }
-    for (let i = 0; i < keyboard[2].length; i++) {
-      keyboard[2][i].style('background-color', keyboardColors[keyboard[0].length + keyboard[1].length + i]).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, letterButtonHeight).position((1.5 + i) * letterButtonWidth, windowHeight - letterButtonHeight);
-    }
-    enterButton.style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(0, windowHeight - letterButtonHeight);
-    backspaceButton.style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(8.5 * letterButtonWidth, windowHeight - letterButtonHeight);
   }
   else {
-    stroke(0);
-    textSize(3 * screenDivision);
-    text("STATISTICS", width / 2, 10 * screenDivision);
-    textSize(4 * screenDivision);
-    text(gameState.gamesPlayed, width / 5, 16 * screenDivision);
-    text(round(100 * gameState.gamesWon / max(gameState.gamesPlayed, 1)), 2 * width / 5, 16 * screenDivision);
-    text(gameState.currentStreak, 3 * width / 5, 16 * screenDivision);
-    text(gameState.maxStreak, 4 * width / 5, 16 * screenDivision);
-    textSize(2 * screenDivision);
-    text("Played", width / 5, 20 * screenDivision);
-    text("Win %", 2 * width / 5, 20 * screenDivision);
-    text("Current", 3 * width / 5, 20 * screenDivision);
-    text("Streak", 3 * width / 5, 22 * screenDivision);
-    text("Max", 4 * width / 5, 20 * screenDivision);
-    text("Streak", 4 * width / 5, 22 * screenDivision);
-    textSize(3 * screenDivision);
-    text("GUESS DISTRIBUTION", width / 2, 28 * screenDivision);
-    textSize(2 * screenDivision);
-    let modeScore = 0;
-    for (let i = 0; i < maxGuesses; i++) {
-      text(i + 1, (22.5 + i * 5) * screenDivision, 46 * screenDivision);
-      modeScore = max(modeScore, gameState.guessDistribution[i]);
+    if (refreshStats) {
+      stroke(0);
+      textSize(3 * screenDivision);
+      text("STATISTICS", width / 2, 10 * screenDivision);
+      textSize(4 * screenDivision);
+      text(gameState.gamesPlayed, width / 5, 16 * screenDivision);
+      text(round(100 * gameState.gamesWon / max(gameState.gamesPlayed, 1)), 2 * width / 5, 16 * screenDivision);
+      text(gameState.currentStreak, 3 * width / 5, 16 * screenDivision);
+      text(gameState.maxStreak, 4 * width / 5, 16 * screenDivision);
+      textSize(2 * screenDivision);
+      text("Played", width / 5, 20 * screenDivision);
+      text("Win %", 2 * width / 5, 20 * screenDivision);
+      text("Current", 3 * width / 5, 20 * screenDivision);
+      text("Streak", 3 * width / 5, 22 * screenDivision);
+      text("Max", 4 * width / 5, 20 * screenDivision);
+      text("Streak", 4 * width / 5, 22 * screenDivision);
+      textSize(3 * screenDivision);
+      text("GUESS DISTRIBUTION", width / 2, 28 * screenDivision);
+      textSize(2 * screenDivision);
+      let modeScore = 0;
+      for (let i = 0; i < maxGuesses; i++) {
+        text(i + 1, (22.5 + i * 5) * screenDivision, 46 * screenDivision);
+        modeScore = max(modeScore, gameState.guessDistribution[i]);
+      }
+      for (let i = 0; i < maxGuesses; i++) {
+        fill((i + 1 === gameState.previousGuesses.length ? "green" : 63));
+        rect((21.5 + i * 5) * screenDivision, 44 * screenDivision, 2 * screenDivision, -gameState.guessDistribution[i] / max(modeScore, 1) * 12 * screenDivision);
+        fill(255);
+        text(gameState.guessDistribution[i], (22.5 + i * 5) * screenDivision, (43 - gameState.guessDistribution[i] / max(modeScore, 1) * 12) * screenDivision);
+      }
+      textSize(3 * screenDivision);
+      text("NEXT DAILY", width / 2, 52 * screenDivision);
+      textSize(4.5 * screenDivision);
     }
-    for (let i = 0; i < maxGuesses; i++) {
-      fill((i + 1 === gameState.previousGuesses.length ? "green" : 63));
-      rect((21.5 + i * 5) * screenDivision, 44 * screenDivision, 2 * screenDivision, -gameState.guessDistribution[i] / max(modeScore, 1) * 12 * screenDivision);
-      fill(255);
-      text(gameState.guessDistribution[i], (22.5 + i * 5) * screenDivision, (43 - gameState.guessDistribution[i] / max(modeScore, 1) * 12) * screenDivision);
-    }
-    textSize(3 * screenDivision);
-    text("NEXT DAILY", width / 2, 52 * screenDivision);
-    textSize(4.5 * screenDivision);
     const secondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
-    const countdownHours = Math.floor(secondsUntilTomorrow / 3600);
-    const countdownMinutes = Math.floor((secondsUntilTomorrow / 60) % 60);
-    const countdownSeconds = secondsUntilTomorrow % 60;
-    text((countdownHours < 10 ? (countdownHours < 1 ? "00" : "0" + countdownHours) : countdownHours) + ":" + (countdownMinutes < 10 ? (countdownMinutes < 1 ? "00" : "0" + countdownMinutes) : countdownMinutes) + ":" + (countdownSeconds < 10 ? (countdownSeconds < 1 ? "00" : "0" + countdownSeconds) : countdownSeconds), width / 2, 58 * screenDivision);
+    if (secondsUntilTomorrow != lastSecondsUntilTomorrow || refreshStats) {
+      refreshStats = false;
+      lastSecondsUntilTomorrow = secondsUntilTomorrow;
+      const countdownHours = Math.floor(secondsUntilTomorrow / 3600);
+      const countdownMinutes = Math.floor((secondsUntilTomorrow / 60) % 60);
+      const countdownSeconds = secondsUntilTomorrow % 60;
+      fill(0);
+      rect(0, 55.75 * screenDivision, width, 4.5 * screenDivision)
+      fill(255);
+      text((countdownHours < 10 ? (countdownHours < 1 ? "00" : "0" + countdownHours) : countdownHours) + ":" + (countdownMinutes < 10 ? (countdownMinutes < 1 ? "00" : "0" + countdownMinutes) : countdownMinutes) + ":" + (countdownSeconds < 10 ? (countdownSeconds < 1 ? "00" : "0" + countdownSeconds) : countdownSeconds), width / 2, 58 * screenDivision);
+    }
   }
-  if (justEndedGameLoopCount === 1) {
-    toggleStats();
-    statsButton.mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut); //re-enable statsButton interactions
-    frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
-    toggleStatsGUI(screenDivision);
-    justEndedGameLoopCount--;
-  }
-  else if (justEndedGameLoopCount > 0) {
-    statsButton.mousePressed(emptyFunction).mouseOver(emptyFunction).mouseOut(emptyFunction); //disable statsButton interaction during countdown/"animation"
-    justEndedGameLoopCount--;
-  }
-  else {
-    toggleStatsGUI(screenDivision);
+  switch (justEndedGameLoopCount) {
+    case 0:
+      toggleStatsGUI(screenDivision);
+      break;
+    case 1:
+      toggleStats();
+      statsButton.mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut); //re-enable statsButton interactions
+      frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
+      toggleStatsGUI(screenDivision);
+      justEndedGameLoopCount--;
+      break;
+    default:
+      statsButton.mousePressed(emptyFunction).mouseOver(emptyFunction).mouseOut(emptyFunction); //disable statsButton interaction during countdown/"animation"
+      justEndedGameLoopCount--;
+      break;
   }
 }
 
 
 function toggleStatsGUI(screenDivision) {
-  statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(14 * screenDivision, 7 * screenDivision).position(width / 2 - 7 * screenDivision, height);
+  statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
+  clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
   statsButton.html((stats ? "x" : "Stats"));
   clipboardButton.style('display', (stats && gameOver ? '' : 'none'));
   for (let i = 0; i < keyboard.length; i++) {
@@ -347,6 +395,7 @@ function setClipboard() { //inspired by https://www.codegrepper.com/code-example
   temp.select();
   document.execCommand("copy");
   document.body.removeChild(temp);
+  window.alert("Copied results to clipboard!");
 }
 
 
@@ -377,6 +426,7 @@ function submitGuess() {
         gameState.currentStreak = 0;
         gameState.maxStreak = max(gameState.maxStreak, gameState.currentStreak);
       }
+      refreshSquares = true;
     }
     else {
       popups.push({ "Not in word list" : Date.now() });
@@ -392,6 +442,7 @@ function submitGuess() {
 
 function removeLetterFromGuess() {
   gameState.guess = gameState.guess.substring(0, gameState.guess.length - 1);
+  refreshSquares = true;
 }
 
 
@@ -426,6 +477,7 @@ function pressedKey(key) {
       //future consideration: show letter-appended-to-guess animation
       storeItem('wordle-rx-state', gameState);
     }
+    refreshSquares = true;
   }
 }
 
@@ -494,6 +546,8 @@ function keyTyped() {
 
 function toggleStats() {
   stats = !stats;
+  refreshSquares = !stats;
+  refreshStats = stats;
 }
 
 
