@@ -391,7 +391,7 @@ function setClipboard() { //inspired by https://www.codegrepper.com/code-example
   for (let i = 0; i < colorsForCopying.length; i++) {
     colorsJoined += colorsForCopying[i].join("") + "\r\n";
   }
-  temp.value = "Wordle Rx  " + ((new Date()).getDay() + 1) + "  " + (gameState.previousGuesses[gameState.previousGuesses.length - 1] === gameState.answer ? gameState.previousGuesses.length : "X") + "/" + maxGuesses + "\r\nhttps://anderjef.github.io/Wordle-Rx\r\n" + colorsJoined;
+  temp.value = "Wordle Rx  " + ((new Date()).getDay() + 1) + "  " + (gameState.previousGuesses[gameState.previousGuesses.length - 1] === gameState.answer ? gameState.previousGuesses.length : "X") + "/" + maxGuesses + "\r\nanderjef.github.io/Wordle-Rx\r\n" + colorsJoined;
   temp.select();
   document.execCommand("copy");
   document.body.removeChild(temp);
