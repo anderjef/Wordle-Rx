@@ -86,9 +86,7 @@ function setup() {
   const expectedAttributes = (gameState !== null && (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2));
   if (!expectedAttributes) {
     if (gameState !== null) {
-      window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
-      removeItem('wordle-rx-state');
-      removeItem('wordle-rx-statep5TypeID');
+      clearRelevantLocalStorage();
     }
     resetLocalStorage();
   }
@@ -134,17 +132,15 @@ function setup() {
       determineResetPoint();
       if (resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
         resetPoint = undefined;
-        window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
-        removeItem('wordle-rx-state');
-        removeItem('wordle-rx-statep5TypeID');
+        clearRelevantLocalStorage();
         resetLocalStorage();
       }
     }
   }
   const screenDivision = width / numScreenDivisions;
-  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(copyButtonMouseOver).mouseOut(copyButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
-  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(cumulativeStatsButtonMouseOver).mouseOut(cumulativeStatsButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
+  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0); //future consideration: bugfix "Stats" button label on mobile not seeming to be centered on the button
+  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
+  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
@@ -326,8 +322,8 @@ function draw() {
         textSize(4.5 * screenDivision);
       }
       else if (gamesPlayed === gameState.games.length) {
-        textSize(2.8 * screenDivision);
-        const congratulationsText = "Congratulations, you have completed\r\nWordle Rx! Use the blue button on the right to copy your final results for sharing. The game will automatically be reset in thirty-two days after the last completed game.";
+        textSize(3 * screenDivision);
+        const congratulationsText = "Congratulations, you have completed Wordle Rx! Use the blue button on the right to copy your final results for sharing. The game will automatically be reset in thirty-two days after the last completed game.";
         text(congratulationsText, 0, 45 * screenDivision, width, height / 3);
         textSize(4.5 * screenDivision);
       }
@@ -369,6 +365,13 @@ function draw() {
     resetPoint = undefined;
     resetLocalStorage();
   }
+}
+
+
+function clearRelevantLocalStorage() {
+  window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
+  removeItem('wordle-rx-state');
+  removeItem('wordle-rx-statep5TypeID');
 }
 
 
@@ -807,21 +810,11 @@ function hashCode(str) { //inspired by https://werxltd.com/wp/2010/05/13/javascr
 }
 
 
-function copyButtonMouseOver() {
-  clipboardButton.style('background-color', color(63, 127, 255));
+function blueButtonMouseOver() {
+  this.style('background-color', color(63, 127, 255));
 }
 
 
-function copyButtonMouseOut() {
-  clipboardButton.style('background-color', color(0, 63, 255));
-}
-
-
-function cumulativeStatsButtonMouseOver() {
-  cumulativeStatsButton.style('background-color', color(63, 127, 255));
-}
-
-
-function cumulativeStatsButtonMouseOut() {
-  cumulativeStatsButton.style('background-color', color(0, 63, 255));
+function blueButtonMouseOut() {
+  this.style('background-color', color(0, 63, 255));
 }
