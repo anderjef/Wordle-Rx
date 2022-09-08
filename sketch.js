@@ -39,21 +39,28 @@ const qwertyKeysToIndices = {
 };
 let lastWindowWidth, lastWindowHeight;
 let refreshSquares = true;
-let lastSecondsUntilTomorrow;
+let lastSecondsUntilNextPlayableGame;
 let refreshStats = false;
 let canvas;
 let displayOffset = 0;
 
-let colors = [];
+let colors;
 let colorsForCopying = [];
 let popups = [];
-let keyboardColors = []; //in the order of the Qwerty keyboard read left to right then top to bottom
+let keyboardColors; //in the order of the Qwerty keyboard read left to right then top to bottom
+let todayIndex;
 let gameOver = false;
 let justEndedGameLoopCount = 0;
 let stats = gameOver; //whether the stats display is open
+let gamesPlayed = 0;
+let gamesWon = 0;
+let currentStreak = 0;
+let maxStreak = 0;
+let resetPoint;
 
 let statsButton;
 let clipboardButton;
+let cumulativeStatsButton;
 let keyboard = [];
 let enterButton;
 let backspaceButton;
@@ -70,53 +77,74 @@ function setup() {
   lastWindowHeight = windowHeight;
   displayOffset = lastWindowWidth / 2 - min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight) / 2;
   canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)).position(displayOffset);
-  lastSecondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
   validWords += answers;
-  for (let i = 0; i < maxGuesses; i++) {
-    colors.push([]);
-    for (let j = 0; j < wordLength; j++) {
-      colors[i].push(color(0));
-    }
-  }
-  for (let i = 0; i < 26; i++) { //26 letters in the alphabet
-    keyboardColors.push(color(127));
-  }
+  const now = new Date();
+  todayIndex = (new Date(now)).getDay();
+  colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => (color(0)))));
+  keyboardColors = Array.from({length: 26}, () => (color(127))); //26 letters in the alphabet
   gameState = getItem('wordle-rx-state');
-  if (gameState === null) {
-    gameState = {
-      answer: answers[(new Date().getDay())],
-      guess: "",
-      previousGuesses: [],
-      gameWon: null,
-      gamesPlayed: 0,
-      gamesWon: 0,
-      currentStreak: 0,
-      maxStreak: 0,
-      guessDistribution: [],
-      lastGame: (new Date()).toDateString().substring(4),
-    };
-    for (let i = 0; i < maxGuesses; i++) {
-      gameState.guessDistribution.push(0);
+  const expectedAttributes = (gameState !== null && (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2));
+  if (!expectedAttributes) {
+    if (gameState !== null) {
+      window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
+      removeItem('wordle-rx-state');
+      removeItem('wordle-rx-statep5TypeID');
     }
+    resetLocalStorage();
   }
   else {
-    if ((new Date()).toDateString().substring(4) === gameState.lastGame) {
-      for (let i = 0; i < gameState.previousGuesses.length; i++) {
-        updateColorsForClipboardAndGUI(gameState.previousGuesses[i], i);
+    if (gameState.games[todayIndex].guess || gameState.games[todayIndex].previousGuesses.length) {
+      for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
+        updateColorsForClipboardAndGUI(gameState.games[todayIndex].previousGuesses[i], i);
       }
     }
-    else {
-      gameState.answer = answers[(new Date()).getDay()];
-      gameState.guess = "";
-      gameState.previousGuesses = [];
-      gameState.gameWon = null;
-      gameState.currentStreak = 0;
-      gameState.lastGame = (new Date()).toDateString().substring(4);
+    for (let i = 0; i < gameState.games.length; i++) {
+      gamesPlayed += (gameState.games[i].dateCompleted !== undefined);
+      gamesWon += (gameState.games[i].dateCompleted !== undefined && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]);
+    }
+    let gamesSortedByCompletion = structuredClone(gameState.games);
+    for (let i = 0; i < gamesSortedByCompletion.length; i++) {
+      gamesSortedByCompletion[i].gameIndex = i; //for later comparing the final guess to the correct answer in the list of answers
+    }
+    gamesSortedByCompletion.sort(function(a, b) {
+      if (a.dateCompleted !== undefined && b.dateCompleted !== undefined) {
+        return (new Date(a.dateCompleted)) - (new Date(b.dateCompleted));
+      }
+      else if (a.dateCompleted !== undefined) {
+        return -1;
+      }
+      else if (b.dateCompleted !== undefined) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    });
+    for (let i = 0; i < gamesSortedByCompletion.length && gamesSortedByCompletion[i].dateCompleted !== undefined; i++) { //all the games with undefined completion dates were sorted to the end
+      if (gamesSortedByCompletion[i].previousGuesses.slice(-1)[0] === answers[gamesSortedByCompletion[i].gameIndex]) { //previousGuesses will have some length because the game was already confirmed to be completed
+        currentStreak++;
+      }
+      else {
+        currentStreak = 0;
+        maxStreak = max(maxStreak, currentStreak);
+      }
+    }
+    maxStreak = max(maxStreak, currentStreak); //if the existing streak is the largest streak
+    if (gamesPlayed === answers.length) {
+      determineResetPoint();
+      if (resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
+        resetPoint = undefined;
+        window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
+        removeItem('wordle-rx-state');
+        removeItem('wordle-rx-statep5TypeID');
+        resetLocalStorage();
+      }
     }
   }
   const screenDivision = width / numScreenDivisions;
   statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(setClipboard).mouseOver(copyMouseOver).mouseOut(copyMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
+  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(copyButtonMouseOver).mouseOut(copyButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
+  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(cumulativeStatsButtonMouseOver).mouseOut(cumulativeStatsButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
@@ -181,9 +209,9 @@ function draw() {
     text("Wordle Rx", width / 2, (numScreenDivisions / 16) * screenDivision);
   }
   if (!stats) {
-    if (gameState.gameWon !== null && !gameOver) {
+    if (gameState.games[todayIndex].previousGuesses.length && gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] && !gameOver) {
       gameOver = true;
-      justEndedGameLoopCount = 2 + 2 * (!gameState.gameWon && popups.length); //extra time on loss for the user to read the answer popup
+      justEndedGameLoopCount = 2 + 2 * (!gameState.games[todayIndex].previousGuesses.slice(-1)[0] && popups.length); //extra time on loss for the user to read the answer popup
       frameRate(1.25); //found to be the only way to have the program show the game's end then the stats page shortly after (as opposed to a busy wait)
     }
     const letterSpaceMultiplier = 9;
@@ -192,7 +220,7 @@ function draw() {
       strokeWeight(3);
       for (let y = 0; y < maxGuesses; y++) {
         for (let x = 0; x < wordLength; x++) {
-          stroke((y < gameState.previousGuesses.length ? colors[y][x] : (y === gameState.previousGuesses.length ? (gameState.guess.length !== wordLength ? (x < gameState.guess.length ? 191 : 91) : (!validWords.includes(gameState.guess) ? color(127, 0, 0) : 191)) : 91)));
+          stroke((y < gameState.games[todayIndex].previousGuesses.length ? colors[y][x] : (y === gameState.games[todayIndex].previousGuesses.length ? (gameState.games[todayIndex].guess.length !== wordLength ? (x < gameState.games[todayIndex].guess.length ? 191 : 91) : (!validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 191)) : 91)));
           fill(colors[y][x]);
           square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
         }
@@ -200,20 +228,20 @@ function draw() {
       strokeWeight(1);
       stroke(255);
       fill(255);
-      for (let i = 0; i < gameState.previousGuesses.length; i++) {
+      for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
         const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
         for (let j = 0; j < wordLength; j++) {
           const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + j * (letterSpaceMultiplier + 1)) * screenDivision;
-          text(gameState.previousGuesses[i][j], x, y);
+          text(gameState.games[todayIndex].previousGuesses[i][j], x, y);
         }
       }
     }
-    stroke((gameState.guess.length === wordLength && !validWords.includes(gameState.guess) ? color(127, 0, 0) : 255));
-    fill((gameState.guess.length === wordLength && !validWords.includes(gameState.guess) ? color(127, 0, 0) : 255));
-    for (let i = 0; i < gameState.guess.length; i++) {
+    stroke((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 255));
+    fill((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 255));
+    for (let i = 0; i < gameState.games[todayIndex].guess.length; i++) {
       const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
-      const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + gameState.previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
-      text(gameState.guess[i], x, y);
+      const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + gameState.games[todayIndex].previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
+      text(gameState.games[todayIndex].guess[i], x, y);
     }
     let numPopupsToDiscard = 0; //depends on popups being in order of decreasing age
     for (let i = 0; i < popups.length; i++) {
@@ -251,7 +279,7 @@ function draw() {
       backspaceButton.style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, newWindowHeight - letterButtonHeight);
     }
     for (let j = 0; j < keyboard.length; j++) {
-    const indexOffset = (j > 0 ? keyboard[0].length + (j > 1 ? keyboard[1].length : 0) : 0);
+      const indexOffset = (j > 0 ? keyboard[0].length + (j > 1 ? keyboard[1].length : 0) : 0);
       for (let i = 0; i < keyboard[j].length; i++) {
         keyboard[j][i].style('background-color', keyboardColors[i + indexOffset]);
       }
@@ -263,10 +291,10 @@ function draw() {
       textSize(3 * screenDivision);
       text("STATISTICS", width / 2, 10 * screenDivision);
       textSize(4 * screenDivision);
-      text(gameState.gamesPlayed, width / 5, 16 * screenDivision);
-      text(round(100 * gameState.gamesWon / max(gameState.gamesPlayed, 1)), 2 * width / 5, 16 * screenDivision);
-      text(gameState.currentStreak, 3 * width / 5, 16 * screenDivision);
-      text(gameState.maxStreak, 4 * width / 5, 16 * screenDivision);
+      text(gamesPlayed, width / 5, 16 * screenDivision);
+      text(round(100 * gamesWon / max(gamesPlayed, 1)), 2 * width / 5, 16 * screenDivision);
+      text(currentStreak, 3 * width / 5, 16 * screenDivision);
+      text(maxStreak, 4 * width / 5, 16 * screenDivision);
       textSize(2 * screenDivision);
       text("Played", width / 5, 20 * screenDivision);
       text("Win %", 2 * width / 5, 20 * screenDivision);
@@ -277,32 +305,42 @@ function draw() {
       textSize(3 * screenDivision);
       text("GUESS DISTRIBUTION", width / 2, 28 * screenDivision);
       textSize(2 * screenDivision);
-      let modeScore = 0;
+      let mode = 0;
+      let guessDistribution = Array.from({length: maxGuesses}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
+      for (let i = 0; i < maxGuesses; i++) {
+        guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
+      }
       for (let i = 0; i < maxGuesses; i++) {
         text(i + 1, (22.5 + i * 5) * screenDivision, 46 * screenDivision);
-        modeScore = max(modeScore, gameState.guessDistribution[i]);
+        mode = max(mode, guessDistribution[i]);
       }
       for (let i = 0; i < maxGuesses; i++) {
-        fill((i + 1 === gameState.previousGuesses.length ? "green" : 63));
-        rect((21.5 + i * 5) * screenDivision, 44 * screenDivision, 2 * screenDivision, -gameState.guessDistribution[i] / max(modeScore, 1) * 12 * screenDivision);
+        fill((i + 1 === gameState.games[todayIndex].previousGuesses.length ? "green" : 63));
+        rect((21.5 + i * 5) * screenDivision, 44 * screenDivision, 2 * screenDivision, -guessDistribution[i] / max(mode, 1) * 12 * screenDivision);
         fill(255);
-        text(gameState.guessDistribution[i], (22.5 + i * 5) * screenDivision, (43 - gameState.guessDistribution[i] / max(modeScore, 1) * 12) * screenDivision);
+        text(guessDistribution[i], (22.5 + i * 5) * screenDivision, (43 - guessDistribution[i] / max(mode, 1) * 12) * screenDivision);
       }
-      textSize(3 * screenDivision);
-      text("NEXT DAILY", width / 2, 52 * screenDivision);
-      textSize(4.5 * screenDivision);
+      if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
+        textSize(3 * screenDivision);
+        text("NEXT DAILY", width / 2, 52 * screenDivision);
+        textSize(4.5 * screenDivision);
+      }
+      else if (gamesPlayed === gameState.games.length) {
+        textSize(2.8 * screenDivision);
+        const congratulationsText = "Congratulations, you have completed\r\nWordle Rx! Use the blue button on the right to copy your final results for sharing. The game will automatically be reset in thirty-two days after the last completed game.";
+        text(congratulationsText, 0, 45 * screenDivision, width, height / 3);
+        textSize(4.5 * screenDivision);
+      }
     }
-    const secondsUntilTomorrow = Math.floor(((new Date()).setHours(24, 0, 0, 0) - (new Date()).getTime()) / 1000);
-    if (secondsUntilTomorrow !== lastSecondsUntilTomorrow || refreshStats) {
-      refreshStats = false;
-      lastSecondsUntilTomorrow = secondsUntilTomorrow;
-      const countdownHours = Math.floor(secondsUntilTomorrow / 3600);
-      const countdownMinutes = Math.floor((secondsUntilTomorrow / 60) % 60);
-      const countdownSeconds = secondsUntilTomorrow % 60;
-      fill(0);
-      rect(0, 55.75 * screenDivision, width, 4.5 * screenDivision)
-      fill(255);
-      text((countdownHours < 10 ? (countdownHours < 1 ? "00" : "0" + countdownHours) : countdownHours) + ":" + (countdownMinutes < 10 ? (countdownMinutes < 1 ? "00" : "0" + countdownMinutes) : countdownMinutes) + ":" + (countdownSeconds < 10 ? (countdownSeconds < 1 ? "00" : "0" + countdownSeconds) : countdownSeconds), width / 2, 58 * screenDivision);
+    if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
+      let offset = 0;
+      for (; offset < gameState.games.length && gameState.games[(todayIndex + offset) % gameState.games.length].dateCompleted === undefined; offset++) {} //because the number of played games does not equal the number of playable games, offset here will never be set to the number of playable games
+      const now = new Date();
+      now.setHours(24, 0, 0, 0);
+      createCountdownTimerGUI(now.setDate(now.getDate() + offset) - (new Date()).getTime(), 58 * screenDivision, screenDivision);
+    }
+    else if (gamesPlayed === gameState.games.length) { //resetPoint will have been set if gamesPlayed === gameState.games.length
+      createCountdownTimerGUI(resetPoint - (new Date()).getTime(), height - 2 * screenDivision, screenDivision);
     }
   }
   switch (justEndedGameLoopCount) {
@@ -325,13 +363,46 @@ function draw() {
     lastWindowWidth = newWindowWidth;
     lastWindowHeight = newWindowHeight;
   }
+  const now = new Date();
+  todayIndex = (new Date(now)).getDay(); //updated at the end of the loop for being initialized before first iteration of the draw loop/function
+  if (gamesPlayed === answers.length && resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
+    resetPoint = undefined;
+    resetLocalStorage();
+  }
+}
+
+
+function resetLocalStorage() {
+  gameState = {
+    ID: Math.floor(Math.random() * 10 ** 12), //ID is one in a trillion
+    games: [], //at the index indicating the day, contains a map of the final state of the unsubmitted guess and the previous guesses as well as the date the game was completed (if it was completed)
+  };
+  gameState.games = Array.from({length: answers.length}, () => ({guess: "", previousGuesses: []}));
+}
+
+
+function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDivision) {
+  const secondsUntilNextPlayableGame = Math.floor(millisecondsUntilNextPlayableGame / 1000);
+  if (secondsUntilNextPlayableGame !== lastSecondsUntilNextPlayableGame || refreshStats) { //lastSecondsUntilNextPlayableGame is initially undefined
+    refreshStats = false;
+    lastSecondsUntilNextPlayableGame = secondsUntilNextPlayableGame;
+    const countdownHours = Math.floor(secondsUntilNextPlayableGame / 3600);
+    const countdownMinutes = Math.floor((secondsUntilNextPlayableGame / 60) % 60);
+    const countdownSeconds = secondsUntilNextPlayableGame % 60;
+    //future consideration: bugfix slight size increase of countdown timer upon opening the stats page
+    fill(0);
+    rect(0, y - 2.25 * screenDivision, width, 4.5 * screenDivision)
+    fill(255);
+    text((countdownHours < 10 ? (countdownHours < 1 ? "00" : "0" + countdownHours) : countdownHours) + ":" + (countdownMinutes < 10 ? (countdownMinutes < 1 ? "00" : "0" + countdownMinutes) : countdownMinutes) + ":" + (countdownSeconds < 10 ? (countdownSeconds < 1 ? "00" : "0" + countdownSeconds) : countdownSeconds), width / 2, y);
+  }
 }
 
 
 function setStatsGUI(screenDivision, scaleChanged) {
   if (scaleChanged) {
     statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-    clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 9 * screenDivision).position(displayOffset + width / 2 - 9 * screenDivision, height);
+    clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
+    cumulativeStatsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
   }
 }
 
@@ -347,10 +418,10 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
   }
   else {
     let guessCharactersBag = guess;
-    let answerCharactersBag = gameState.answer;
+    let answerCharactersBag = answers[todayIndex];
     let matchedIndices = [];
     for (let i = 0; i < wordLength; i++) {
-      if (guess[i] === gameState.answer[i]) {
+      if (guess[i] === answers[todayIndex][i]) {
         colors[guessIndex][i] = color(0, 127, 0);
         colorsForCopying[guessIndex].push("🟩");
         keyboardColors[qwertyKeysToIndices[guess[i]]] = color(0, 127, 0);
@@ -374,57 +445,51 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
         answerCharactersBag = answerCharactersBag.replace(guess[i], "");
       }
     }
-    for (let i = 0; i < guessCharactersBag.length; i++) {
-      if (keyboardColors[qwertyKeysToIndices[guessCharactersBag[i]]].toString() !== color(0, 127, 0).toString() && keyboardColors[qwertyKeysToIndices[guessCharactersBag[i]]].toString() !== color(127, 127, 0).toString()) {
-        keyboardColors[qwertyKeysToIndices[guessCharactersBag[i]]] = color(63);
+    for (const g of guessCharactersBag) {
+      if (keyboardColors[qwertyKeysToIndices[g]].toString() !== color(0, 127, 0).toString() && keyboardColors[qwertyKeysToIndices[g]].toString() !== color(127, 127, 0).toString()) {
+        keyboardColors[qwertyKeysToIndices[g]] = color(63);
       }
     }
   }
 }
 
 
-function setClipboard() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
-  clipboardButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
-  let temp = document.createElement("textarea");
-  document.body.appendChild(temp);
-  let colorsJoined = "";
-  for (let i = 0; i < colorsForCopying.length; i++) {
-    colorsJoined += colorsForCopying[i].join("") + "\r\n";
+function determineResetPoint() {
+  if (gameState.games.length === answers.length) {
+    for (const game of gameState.games) {
+      if (game.dateCompleted === undefined) {
+        return;
+      }
+    }
+    resetPoint = (new Date()).setDate((new Date()).getDate() + 32).getTime();
   }
-  temp.value = "Wordle Rx  " + ((new Date()).getDay() + 1) + "  " + (gameState.previousGuesses[gameState.previousGuesses.length - 1] === gameState.answer ? gameState.previousGuesses.length : "X") + "/" + maxGuesses + "\r\nanderjef.github.io/Wordle-Rx\r\n" + colorsJoined;
-  temp.select();
-  document.execCommand("copy");
-  document.body.removeChild(temp);
-  window.alert("Copied results to clipboard!");
+}
+
+
+function completedDaily(won) {
+  determineResetPoint();
+  gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().substring(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
+  gamesWon += won;
+  gamesPlayed++;
+  currentStreak = (won ? currentStreak + 1 : 0);
+  maxStreak = max(maxStreak, currentStreak);
 }
 
 
 function submitGuess() {
-  if (gameState.guess.length === wordLength) {
-    if (validWords.includes(gameState.guess)) {
-      if (gameState.guess === gameState.answer) { //won
-        updateColorsForClipboardAndGUI(gameState.guess, gameState.previousGuesses.length, true);
-        gameState.previousGuesses.push(gameState.guess);
-        gameState.guess = "";
-        gameState.gameWon = true;
-        gameState.gamesPlayed++;
-        gameState.gamesWon++;
-        gameState.currentStreak++;
-        gameState.maxStreak = max(gameState.maxStreak, gameState.currentStreak);
-        gameState.guessDistribution[gameState.previousGuesses.length - 1]++;
-      }
-      else {
-        updateColorsForClipboardAndGUI(gameState.guess, gameState.previousGuesses.length);
-        gameState.previousGuesses.push(gameState.guess);
-        gameState.guess = "";
-      }
+  if (gameState.games[todayIndex].guess.length === wordLength) {
+    if (validWords.includes(gameState.games[todayIndex].guess)) {
+      const guessMatchesAnswer = (gameState.games[todayIndex].guess === answers[todayIndex]);
+      updateColorsForClipboardAndGUI(gameState.games[todayIndex].guess, gameState.games[todayIndex].previousGuesses.length, guessMatchesAnswer);
+      gameState.games[todayIndex].previousGuesses.push(gameState.games[todayIndex].guess);
+      gameState.games[todayIndex].guess = "";
       //future consideration: show word-submitted animation
-      if (gameState.previousGuesses.length === maxGuesses) { //lost
-        popups.push({ [gameState.answer] : Date.now() });
-        gameState.gameWon = false;
-        gameState.gamesPlayed++;
-        gameState.currentStreak = 0;
-        gameState.maxStreak = max(gameState.maxStreak, gameState.currentStreak);
+      if (guessMatchesAnswer) { //won
+        completedDaily(true);
+      }
+      else if (gameState.games[todayIndex].previousGuesses.length === maxGuesses) { //lost
+        completedDaily(false);
+        popups.push({ [answers[todayIndex]] : Date.now() });
       }
       refreshSquares = true;
     }
@@ -441,14 +506,15 @@ function submitGuess() {
 
 
 function removeLetterFromGuess() {
-  gameState.guess = gameState.guess.substring(0, gameState.guess.length - 1);
+  gameState.games[todayIndex].guess = gameState.games[todayIndex].guess.substring(0, gameState.games[todayIndex].guess.length - 1);
+  saveState();
   refreshSquares = true;
 }
 
 
 function saveState() {
   storeItem('wordle-rx-state', gameState);
-  if (gameState.gamesPlayed === 0 && gameState.previousGuesses.length === 0 && gameState.guess.length === 0) {
+  if (!gamesPlayed && !gameState.games[todayIndex].previousGuesses.length && !gameState.games[todayIndex].guess.length && getItem('wordle-rx-state') !== null) {
     removeItem('wordle-rx-state');
     removeItem('wordle-rx-statep5TypeID');
   }
@@ -481,8 +547,8 @@ function keyPressed() {
 
 function pressedKey(key) {
   if (!stats && !gameOver) {
-    if (gameState.guess.length < wordLength) {
-      gameState.guess += key.toUpperCase();
+    if (gameState.games[todayIndex].guess.length < wordLength) {
+      gameState.games[todayIndex].guess += key.toUpperCase();
       //future consideration: show letter-appended-to-guess animation
       saveState();
     }
@@ -621,6 +687,7 @@ function toggleStats() {
   lastWindowHeight = -1; //trigger resize of elements; redundant
   statsButton.html((stats ? "x" : "Stats"));
   clipboardButton.style('display', (stats && gameOver ? '' : 'none'));
+  cumulativeStatsButton.style('display', (stats && gameOver ? '' : 'none'));
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
       keyboard[i][j].style('display', (stats ? 'none' : ''));
@@ -644,11 +711,117 @@ function statsMouseOut() {
 function emptyFunction() {}
 
 
-function copyMouseOver() {
+function setClipboard(text) {
+  let temp = document.createElement("textarea");
+  document.body.appendChild(temp);
+  temp.value = text;
+  temp.select();
+  document.execCommand("copy");
+  document.body.removeChild(temp);
+}
+
+
+function copyDaily() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
+  clipboardButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
+  let colorsJoined = "";
+  for (const c of colorsForCopying) {
+    colorsJoined += c.join("") + "\r\n";
+  }
+  setClipboard("Wordle Rx  #" + (todayIndex + 1) + "  " + (gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X") + "/" + maxGuesses + "\r\nanderjef.github.io/Wordle-Rx\r\n" + colorsJoined);
+  window.alert("Results copied to clipboard!");
+}
+
+
+function copyStats() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
+  cumulativeStatsButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
+  let mean = 0;
+  let guessCountsSorted = [];
+  let modeTempArray = Array.from({length: gameState.games.length}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
+  let scores = []; //"x" for unattempted, "X" for failed attempt, one more than how many guesses were taken with "+" appended for started but incomplete games, or how many guesses it took
+  for (let i = 0; i < gameState.games.length; i++) {
+    if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
+      mean += gameState.games[i].previousGuesses.length;
+      scores.push(gameState.games[i].previousGuesses.length);
+      guessCountsSorted.push(gameState.games[i].previousGuesses.length);
+      modeTempArray[gameState.games[i].previousGuesses.length - 1]++;
+    }
+    else if (gameState.games[i].previousGuesses.length) {
+      scores.push((gameState.games[i].previousGuesses.length === maxGuesses ? "X" : gameState.games[i].previousGuesses.length + "+"));
+    }
+    else {
+      scores.push("x");
+    }
+  }
+  mean /= gamesWon;
+  mean.toFixed(2);
+  guessCountsSorted.sort(function(a, b) { return a - b; });
+  guessCountsSorted.concat(new Array(gamesPlayed - gamesWon).fill("X"));
+  let median = (gamesPlayed ? "X" : undefined);
+  if (guessCountsSorted.length) {
+    if (guessCountsSorted.length % 2 === 0) {
+      const leftMiddle = guessCountsSorted[guessCountsSorted.length / 2 - 1];
+      const rightMiddle = guessCountsSorted[guessCountsSorted.length / 2];
+      if (leftMiddle === "X" && rightMiddle === "X") {
+        median = "X";
+      }
+      else if (leftMiddle === "X") { //given that the array was sorted numerically ascending (left to right), this condition shouldn't occur, but is here for clarification
+        median = (rightMiddle + maxGuesses) / 2 + "+"; //averaged with maxGuesses because had the number of guesses not been constrained, the best the player could have done would be to have guessed the word on the next guess
+      }
+      else if (rightMiddle === "X") {
+        median = (leftMiddle + maxGuesses) / 2 + "+"; //averaged with maxGuesses because had the number of guesses not been constrained, the best the player could have done would be to have guessed the word on the next guess
+      }
+      else {
+        median = (leftMiddle + rightMiddle) / 2;
+      }
+    }
+    else {
+      median = guessCountsSorted[(guessCountsSorted.length - 1) / 2];
+    }
+  }
+  let modeCount = 0;
+  for (const i of modeTempArray) {
+    modeCount = max(modeCount, i);
+  }
+  let mode = [];
+  if (modeCount) {
+    for (let i = 0; i < modeTempArray.length; i++) {
+      if (modeTempArray[i] === modeCount) {
+        mode.push(i + 1);
+      }
+    }
+    if (gamesPlayed - gamesWon === modeCount) {
+      mode.push("X"); //append the count of the loss condition (if necessary)
+    }
+  }
+  setClipboard("Wordle Rx  " + gamesPlayed + "/" + gameState.games.length + "\r\nanderjef.github.io/Wordle-Rx\r\nID: " + gameState.ID + "\r\nHash: " + hashCode(gameState.ID + "\r\n" + scores) + "\r\nMax streak: " + maxStreak + "\r\nMean (successful): " + (mean ? mean : "N/A") + "\r\nMedian (completed): " + (median ? median : "N/A") + "\r\nMode (completed): " + (mode.length ? mode : "N/A") + "\r\nScores: " + scores);
+  window.alert("Stats copied to clipboard!");
+}
+
+
+function hashCode(str) { //inspired by https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+  }
+  return hash;
+}
+
+
+function copyButtonMouseOver() {
   clipboardButton.style('background-color', color(63, 127, 255));
 }
 
 
-function copyMouseOut() {
+function copyButtonMouseOut() {
   clipboardButton.style('background-color', color(0, 63, 255));
+}
+
+
+function cumulativeStatsButtonMouseOver() {
+  cumulativeStatsButton.style('background-color', color(63, 127, 255));
+}
+
+
+function cumulativeStatsButtonMouseOut() {
+  cumulativeStatsButton.style('background-color', color(0, 63, 255));
 }

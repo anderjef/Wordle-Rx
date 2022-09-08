@@ -64,3 +64,4 @@ Type letters or use the provided on-screen keyboard to append to the current gue
 - <https://www.quordle.com/>&mdash;inspiration
 - <https://raw.githubusercontent.com/tabatkins/wordle-list/main/words>&mdash;valid words.txt
 - <https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard>&mdash;writing to clipboard
+- <https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/>&mdash;generating a hash from a string
