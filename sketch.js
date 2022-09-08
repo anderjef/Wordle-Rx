@@ -144,34 +144,34 @@ function setup() {
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
-  keyboard[0].push(createButton("Q").mousePressed(function() { keyTyped("Q"); }).style('background-color', keyboardColors[ 0]).position(displayOffset + 0 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("W").mousePressed(function() { keyTyped("W"); }).style('background-color', keyboardColors[ 1]).position(displayOffset + 1 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("E").mousePressed(function() { keyTyped("E"); }).style('background-color', keyboardColors[ 2]).position(displayOffset + 2 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("R").mousePressed(function() { keyTyped("R"); }).style('background-color', keyboardColors[ 3]).position(displayOffset + 3 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("T").mousePressed(function() { keyTyped("T"); }).style('background-color', keyboardColors[ 4]).position(displayOffset + 4 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("Y").mousePressed(function() { keyTyped("Y"); }).style('background-color', keyboardColors[ 5]).position(displayOffset + 5 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("U").mousePressed(function() { keyTyped("U"); }).style('background-color', keyboardColors[ 6]).position(displayOffset + 6 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("I").mousePressed(function() { keyTyped("I"); }).style('background-color', keyboardColors[ 7]).position(displayOffset + 7 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("O").mousePressed(function() { keyTyped("O"); }).style('background-color', keyboardColors[ 8]).position(displayOffset + 8 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
-  keyboard[0].push(createButton("P").mousePressed(function() { keyTyped("P"); }).style('background-color', keyboardColors[ 9]).position(displayOffset + 9 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Q").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 0]).position(displayOffset + 0 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("W").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 1]).position(displayOffset + 1 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("E").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 2]).position(displayOffset + 2 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("R").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 3]).position(displayOffset + 3 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("T").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 4]).position(displayOffset + 4 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("Y").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 5]).position(displayOffset + 5 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("U").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 6]).position(displayOffset + 6 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("I").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 7]).position(displayOffset + 7 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("O").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 8]).position(displayOffset + 8 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
+  keyboard[0].push(createButton("P").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[ 9]).position(displayOffset + 9 * letterButtonWidth, lastWindowHeight - 3 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[1].push(createButton("A").mousePressed(function() { keyTyped("A"); }).style('background-color', keyboardColors[10]).position(displayOffset + 0.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("S").mousePressed(function() { keyTyped("S"); }).style('background-color', keyboardColors[11]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("D").mousePressed(function() { keyTyped("D"); }).style('background-color', keyboardColors[12]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("F").mousePressed(function() { keyTyped("F"); }).style('background-color', keyboardColors[13]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("G").mousePressed(function() { keyTyped("G"); }).style('background-color', keyboardColors[14]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("H").mousePressed(function() { keyTyped("H"); }).style('background-color', keyboardColors[15]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("J").mousePressed(function() { keyTyped("J"); }).style('background-color', keyboardColors[16]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("K").mousePressed(function() { keyTyped("K"); }).style('background-color', keyboardColors[17]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
-  keyboard[1].push(createButton("L").mousePressed(function() { keyTyped("L"); }).style('background-color', keyboardColors[18]).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("A").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[10]).position(displayOffset + 0.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("S").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[11]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("D").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[12]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("F").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[13]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("G").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[14]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("H").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[15]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("J").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[16]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("K").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[17]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
+  keyboard[1].push(createButton("L").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[18]).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - 2 * letterButtonHeight));
   keyboard.push([]);
-  keyboard[2].push(createButton("Z").mousePressed(function() { keyTyped("Z"); }).style('background-color', keyboardColors[19]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("X").mousePressed(function() { keyTyped("X"); }).style('background-color', keyboardColors[20]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("C").mousePressed(function() { keyTyped("C"); }).style('background-color', keyboardColors[21]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("V").mousePressed(function() { keyTyped("V"); }).style('background-color', keyboardColors[22]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("B").mousePressed(function() { keyTyped("B"); }).style('background-color', keyboardColors[23]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("N").mousePressed(function() { keyTyped("N"); }).style('background-color', keyboardColors[24]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
-  keyboard[2].push(createButton("M").mousePressed(function() { keyTyped("M"); }).style('background-color', keyboardColors[25]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("Z").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[19]).position(displayOffset + 1.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("X").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[20]).position(displayOffset + 2.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("C").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[21]).position(displayOffset + 3.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("V").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[22]).position(displayOffset + 4.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("B").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[23]).position(displayOffset + 5.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("N").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[24]).position(displayOffset + 6.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
+  keyboard[2].push(createButton("M").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[25]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
       keyboard[i][j].style('color', color(255)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, letterButtonHeight);
@@ -351,7 +351,7 @@ function draw() {
       justEndedGameLoopCount--;
       break;
     default:
-      statsButton.mousePressed(emptyFunction).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
+      statsButton.mousePressed(function() {}).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
       justEndedGameLoopCount--;
       break;
   }
@@ -368,8 +368,10 @@ function draw() {
 }
 
 
-function clearRelevantLocalStorage() {
-  window.alert("Properties of game state local storage did not match expected attributes, so clearing all saved local storage game data.");
+function clearRelevantLocalStorage(alert = true) {
+  if (alert) {
+    window.alert("Properties of game state local storage did not match expected attributes, so clearing all local storage Wordle Rx data.");
+  }
   removeItem('wordle-rx-state');
   removeItem('wordle-rx-statep5TypeID');
 }
@@ -396,7 +398,7 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
     fill(0);
     rect(0, y - 2.25 * screenDivision, width, 4.5 * screenDivision)
     fill(255);
-    text((countdownHours < 10 ? (countdownHours < 1 ? "00" : "0" + countdownHours) : countdownHours) + ":" + (countdownMinutes < 10 ? (countdownMinutes < 1 ? "00" : "0" + countdownMinutes) : countdownMinutes) + ":" + (countdownSeconds < 10 ? (countdownSeconds < 1 ? "00" : "0" + countdownSeconds) : countdownSeconds), width / 2, y);
+    text(`${countdownHours.toString().padStart(2, "0")}:${countdownMinutes.toString().padStart(2, "0")}:${countdownSeconds.toString().padStart(2, "0")}`, width / 2, y);
   }
 }
 
@@ -518,8 +520,7 @@ function removeLetterFromGuess() {
 function saveState() {
   storeItem('wordle-rx-state', gameState);
   if (!gamesPlayed && !gameState.games[todayIndex].previousGuesses.length && !gameState.games[todayIndex].guess.length && getItem('wordle-rx-state') !== null) {
-    removeItem('wordle-rx-state');
-    removeItem('wordle-rx-statep5TypeID');
+    clearRelevantLocalStorage(false);
   }
 }
 
@@ -711,9 +712,6 @@ function statsMouseOut() {
 }
 
 
-function emptyFunction() {}
-
-
 function setClipboard(text) {
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
@@ -730,7 +728,7 @@ function copyDaily() { //inspired by https://www.codegrepper.com/code-examples/h
   for (const c of colorsForCopying) {
     colorsJoined += c.join("") + "\r\n";
   }
-  setClipboard("Wordle Rx  #" + (todayIndex + 1) + "  " + (gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X") + "/" + maxGuesses + "\r\nanderjef.github.io/Wordle-Rx\r\n" + colorsJoined);
+  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`);
   window.alert("Results copied to clipboard!");
 }
 
@@ -796,7 +794,7 @@ function copyStats() { //inspired by https://www.codegrepper.com/code-examples/h
       mode.push("X"); //append the count of the loss condition (if necessary)
     }
   }
-  setClipboard("Wordle Rx  " + gamesPlayed + "/" + gameState.games.length + "\r\nanderjef.github.io/Wordle-Rx\r\nID: " + gameState.ID + "\r\nHash: " + hashCode(gameState.ID + "\r\n" + scores) + "\r\nMax streak: " + maxStreak + "\r\nMean (successful): " + (mean ? mean : "N/A") + "\r\nMedian (completed): " + (median ? median : "N/A") + "\r\nMode (completed): " + (mode.length ? mode : "N/A") + "\r\nScores: " + scores);
+  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${(mean ? mean : "N/A")}\r\nMedian (completed): ${(median ? median : "N/A")}\r\nMode (completed): ${(mode.length ? mode : "N/A")}\r\nScores: ${scores}`);
   window.alert("Stats copied to clipboard!");
 }
 
