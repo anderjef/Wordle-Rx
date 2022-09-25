@@ -1,7 +1,7 @@
 //Jeffrey Andersen
 
 const wordLength = 5;
-const maxGuesses = 6;
+const maxGuesses = 7;
 const numScreenDivisions = 70;
 const additionalScreenDivisionsForStatsButton = 9;
 const canvasWindowWidthMultiplier = 1, canvasWindowHeightMultiplier = 7 / 10;
@@ -43,10 +43,11 @@ let lastSecondsUntilNextPlayableGame;
 let refreshStats = false;
 let canvas;
 let displayOffset = 0;
+const palette = {};
 
 let colors;
-let colorsForCopying = [];
-let popups = [];
+const colorsForCopying = [];
+const popups = [];
 let keyboardColors; //in the order of the Qwerty keyboard read left to right then top to bottom
 let todayIndex;
 let gameOver = false;
@@ -61,7 +62,7 @@ let resetPoint;
 let statsButton;
 let clipboardButton;
 let cumulativeStatsButton;
-let keyboard = [];
+const keyboard = [];
 let enterButton;
 let backspaceButton;
 
@@ -80,8 +81,16 @@ function setup() {
   validWords += answers;
   const now = new Date();
   todayIndex = (new Date(now)).getDay();
-  colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => (color(0)))));
-  keyboardColors = Array.from({length: 26}, () => (color(127))); //26 letters in the alphabet
+  palette.green = color(0, 127, 0);
+  palette.yellow = color(159, 159, 0);
+  palette.red = color(127, 0, 0);
+  palette.darkBlue = color(0, 63, 255);
+  palette.lightBlue = color(63, 127, 255);
+  palette.white = color("white");
+  palette.black = color("black");
+  palette.gray = color("gray");
+  colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => (palette.black))));
+  keyboardColors = Array.from({length: 26}, () => (palette.gray)); //26 letters in the alphabet
   gameState = getItem('wordle-rx-state');
   const expectedAttributes = (gameState !== null && (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2));
   if (!expectedAttributes) {
@@ -97,6 +106,9 @@ function setup() {
       }
     }
     for (let i = 0; i < gameState.games.length; i++) {
+      if (gameState.games[i].dateCompleted !== undefined && gameState.games[i].previousGuesses.length < maxGuesses) { //backwards compatibility of giving extra guesses for completed games when maxGuesses is increased
+        gameState.games[i].dateCompleted = undefined;
+      }
       gamesPlayed += (gameState.games[i].dateCompleted !== undefined);
       gamesWon += (gameState.games[i].dateCompleted !== undefined && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]);
     }
@@ -138,9 +150,9 @@ function setup() {
     }
   }
   const screenDivision = width / numScreenDivisions;
-  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', color(255)).style('background-color', color(0)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0); //future consideration: bugfix "Stats" button label on mobile not seeming to be centered on the button
-  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
-  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', color(255)).style('background-color', color(0, 63, 255)).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
+  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', palette.white).style('background-color', palette.black).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0); //future consideration: bugfix "Stats" button label on mobile not seeming to be centered on the button
+  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
+  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
   const letterButtonWidth = (numScreenDivisions / 10) * screenDivision;
   const letterButtonHeight = (numScreenDivisions / 7) * screenDivision;
   keyboard.push([]);
@@ -174,11 +186,11 @@ function setup() {
   keyboard[2].push(createButton("M").mousePressed(function() { keyTyped(this.elt.innerText); }).style('background-color', keyboardColors[25]).position(displayOffset + 7.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight));
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
-      keyboard[i][j].style('color', color(255)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, letterButtonHeight);
+      keyboard[i][j].style('color', palette.white).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, letterButtonHeight);
     }
   }
-  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, lastWindowHeight - letterButtonHeight);
-  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', color(255)).style('background-color', color(127)).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
+  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset, lastWindowHeight - letterButtonHeight);
+  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', screenDivision + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
   textAlign(CENTER, CENTER);
 }
 
@@ -210,13 +222,15 @@ function draw() {
       justEndedGameLoopCount = 2 + 2 * (!gameState.games[todayIndex].previousGuesses.slice(-1)[0] && popups.length); //extra time on loss for the user to read the answer popup
       frameRate(1.25); //found to be the only way to have the program show the game's end then the stats page shortly after (as opposed to a busy wait)
     }
-    const letterSpaceMultiplier = 9;
+    const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * numScreenDivisions) / maxGuesses - 1);
+    const gameLetterSize = min(numScreenDivisions / 15, letterSpaceMultiplier - 1); //because p5.js warns when placed directly inside textSize()
+    textSize(gameLetterSize * screenDivision);
     if (refreshSquares) {
       refreshSquares = false;
       strokeWeight(3);
       for (let y = 0; y < maxGuesses; y++) {
         for (let x = 0; x < wordLength; x++) {
-          stroke((y < gameState.games[todayIndex].previousGuesses.length ? colors[y][x] : (y === gameState.games[todayIndex].previousGuesses.length ? (gameState.games[todayIndex].guess.length !== wordLength ? (x < gameState.games[todayIndex].guess.length ? 191 : 91) : (!validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 191)) : 91)));
+          stroke((y < gameState.games[todayIndex].previousGuesses.length ? colors[y][x] : (y === gameState.games[todayIndex].previousGuesses.length ? (gameState.games[todayIndex].guess.length !== wordLength ? (x < gameState.games[todayIndex].guess.length ? 191 : 91) : (!validWords.includes(gameState.games[todayIndex].guess) ? palette.red : 191)) : 91)));
           fill(colors[y][x]);
           square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
         }
@@ -232,8 +246,8 @@ function draw() {
         }
       }
     }
-    stroke((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 255));
-    fill((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? color(127, 0, 0) : 255));
+    stroke((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : 255));
+    fill((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : 255));
     for (let i = 0; i < gameState.games[todayIndex].guess.length; i++) {
       const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
       const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + gameState.games[todayIndex].previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
@@ -416,20 +430,20 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
   colorsForCopying.push([]);
   if (isWinningGuess) {
     for (let i = 0; i < wordLength; i++) {
-      colors[guessIndex][i] = color(0, 127, 0);
+      colors[guessIndex][i] = palette.green;
       colorsForCopying[guessIndex].push("🟩");
-      keyboardColors[qwertyKeysToIndices[guess[i]]] = color(0, 127, 0);
+      keyboardColors[qwertyKeysToIndices[guess[i]]] = palette.green;
     }
   }
   else {
     let guessCharactersBag = guess;
     let answerCharactersBag = answers[todayIndex];
-    let matchedIndices = [];
+    const matchedIndices = [];
     for (let i = 0; i < wordLength; i++) {
       if (guess[i] === answers[todayIndex][i]) {
-        colors[guessIndex][i] = color(0, 127, 0);
+        colors[guessIndex][i] = palette.green;
         colorsForCopying[guessIndex].push("🟩");
-        keyboardColors[qwertyKeysToIndices[guess[i]]] = color(0, 127, 0);
+        keyboardColors[qwertyKeysToIndices[guess[i]]] = palette.green;
         matchedIndices.push(i);
         guessCharactersBag = guessCharactersBag.replace(guess[i], "");
         answerCharactersBag = answerCharactersBag.replace(guess[i], "");
@@ -441,17 +455,17 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
     }
     for (let i = 0; i < wordLength; i++) {
       if (!matchedIndices.includes(i) && answerCharactersBag.includes(guess[i])) {
-        colors[guessIndex][i] = color(127, 127, 0);
+        colors[guessIndex][i] = palette.yellow;
         colorsForCopying[guessIndex][i] = "🟨";
-        if (keyboardColors[qwertyKeysToIndices[guess[i]]].toString() !== color(0, 127, 0).toString()) {
-          keyboardColors[qwertyKeysToIndices[guess[i]]] = color(127, 127, 0);
+        if (keyboardColors[qwertyKeysToIndices[guess[i]]].toString() !== palette.green.toString()) {
+          keyboardColors[qwertyKeysToIndices[guess[i]]] = palette.yellow;
         }
         guessCharactersBag = guessCharactersBag.replace(guess[i], "");
         answerCharactersBag = answerCharactersBag.replace(guess[i], "");
       }
     }
     for (const g of guessCharactersBag) {
-      if (keyboardColors[qwertyKeysToIndices[g]].toString() !== color(0, 127, 0).toString() && keyboardColors[qwertyKeysToIndices[g]].toString() !== color(127, 127, 0).toString()) {
+      if (keyboardColors[qwertyKeysToIndices[g]].toString() !== palette.green.toString() && keyboardColors[qwertyKeysToIndices[g]].toString() !== palette.yellow.toString()) {
         keyboardColors[qwertyKeysToIndices[g]] = color(63);
       }
     }
@@ -708,11 +722,11 @@ function statsMouseOver() {
 
 
 function statsMouseOut() {
-  statsButton.style('background-color', color(0));
+  statsButton.style('background-color', palette.black);
 }
 
 
-function setClipboard(text) {
+function setClipboard(text) { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
   temp.value = text;
@@ -722,8 +736,8 @@ function setClipboard(text) {
 }
 
 
-function copyDaily() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
-  clipboardButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
+function copyDaily() {
+  clipboardButton.style('background-color', palette.darkBlue); //reset button background color to indicate button was pressed
   let colorsJoined = "";
   for (const c of colorsForCopying) {
     colorsJoined += c.join("") + "\r\n";
@@ -733,12 +747,12 @@ function copyDaily() { //inspired by https://www.codegrepper.com/code-examples/h
 }
 
 
-function copyStats() { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
-  cumulativeStatsButton.style('background-color', color(0, 63, 255)); //reset button background color to indicate button was pressed
+function copyStats() { //expects gamesWon !== 0
+  cumulativeStatsButton.style('background-color', palette.darkBlue); //reset button background color to indicate button was pressed
   let mean = 0;
-  let guessCountsSorted = [];
+  const guessCountsSorted = [];
   let modeTempArray = Array.from({length: gameState.games.length}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
-  let scores = []; //"x" for unattempted, "X" for failed attempt, one more than how many guesses were taken with "+" appended for started but incomplete games, or how many guesses it took
+  const scores = []; //"x" for unattempted, "X" for failed attempt, one more than how many guesses were taken with "+" appended for started but incomplete games, or how many guesses it took
   for (let i = 0; i < gameState.games.length; i++) {
     if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
       mean += gameState.games[i].previousGuesses.length;
@@ -783,7 +797,7 @@ function copyStats() { //inspired by https://www.codegrepper.com/code-examples/h
   for (const i of modeTempArray) {
     modeCount = max(modeCount, i);
   }
-  let mode = [];
+  const mode = [];
   if (modeCount) {
     for (let i = 0; i < modeTempArray.length; i++) {
       if (modeTempArray[i] === modeCount) {
@@ -809,10 +823,10 @@ function hashCode(str) { //inspired by https://werxltd.com/wp/2010/05/13/javascr
 
 
 function blueButtonMouseOver() {
-  this.style('background-color', color(63, 127, 255));
+  this.style('background-color', palette.lightBlue);
 }
 
 
 function blueButtonMouseOut() {
-  this.style('background-color', color(0, 63, 255));
+  this.style('background-color', palette.darkBlue);
 }
