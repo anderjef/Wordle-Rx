@@ -487,7 +487,7 @@ function determineResetPoint() {
 
 function completedDaily(won) {
   determineResetPoint();
-  gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().substring(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
+  gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
   gamesWon += won;
   gamesPlayed++;
   currentStreak = (won ? currentStreak + 1 : 0);
@@ -525,7 +525,7 @@ function submitGuess() {
 
 
 function removeLetterFromGuess() {
-  gameState.games[todayIndex].guess = gameState.games[todayIndex].guess.substring(0, gameState.games[todayIndex].guess.length - 1);
+  gameState.games[todayIndex].guess = gameState.games[todayIndex].guess.slice(0, gameState.games[todayIndex].guess.length - 1);
   saveState();
   refreshSquares = true;
 }
@@ -726,13 +726,16 @@ function statsMouseOut() {
 }
 
 
-function setClipboard(text) { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
+function setClipboard(text, alertText="") { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
   temp.value = text;
   temp.select();
   document.execCommand("copy");
   document.body.removeChild(temp);
+  if (alertText) {
+    window.alert(alertText);
+  }
 }
 
 
@@ -742,8 +745,7 @@ function copyDaily() {
   for (const c of colorsForCopying) {
     colorsJoined += c.join("") + "\r\n";
   }
-  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`);
-  window.alert("Results copied to clipboard!");
+  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard!");
 }
 
 
@@ -808,8 +810,7 @@ function copyStats() { //expects gamesWon !== 0
       mode.push("X"); //append the count of the loss condition (if necessary)
     }
   }
-  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${(mean ? mean : "N/A")}\r\nMedian (completed): ${(median ? median : "N/A")}\r\nMode (completed): ${(mode.length ? mode : "N/A")}\r\nScores: ${scores}`);
-  window.alert("Stats copied to clipboard!");
+  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${(mean ? mean : "N/A")}\r\nMedian (completed): ${(median ? median : "N/A")}\r\nMode (completed): ${(mode.length ? mode : "N/A")}\r\nScores: ${scores}`, "Stats copied to clipboard!");
 }
 
 
