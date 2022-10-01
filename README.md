@@ -25,7 +25,9 @@ Current version: 1.0.0
 
 #### GUI
 
-![The main game display on startup](Picture1.png)
+![The main game display responding to a sequence of varied window dimensions](Picture1.gif)
+
+The black is the provided display area.
 
 ### Folder structure
 
