@@ -3,7 +3,6 @@
 const wordLength = 5;
 const maxGuesses = 7;
 const numScreenDivisions = 70;
-const additionalScreenDivisionsForStatsButton = 9;
 const canvasWindowWidthMultiplier = 1, canvasWindowHeightMultiplier = 7 / 10;
 let validWords;
 let answers;
@@ -149,11 +148,12 @@ function setup() {
       }
     }
     for (let i = 0; i < gameState.games.length; i++) {
-      if (gameState.games[i].dateCompleted !== undefined && gameState.games[i].previousGuesses.length < maxGuesses) { //backwards compatibility of giving extra guesses for completed games when maxGuesses is increased
+      const hasDateCompleted = gameState.games[i].dateCompleted !== undefined;
+      if (hasDateCompleted && gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.length < maxGuesses && gameState.games[i].previousGuesses.slice(-1)[0] !== answers[i]) { //backwards compatibility of giving extra guesses for completed games when maxGuesses is increased
         gameState.games[i].dateCompleted = undefined;
       }
-      gamesPlayed += (gameState.games[i].dateCompleted !== undefined);
-      gamesWon += (gameState.games[i].dateCompleted !== undefined && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]);
+      gamesPlayed += hasDateCompleted;
+      gamesWon += (hasDateCompleted && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]);
     }
     let gamesSortedByCompletion = structuredClone(gameState.games);
     for (let i = 0; i < gamesSortedByCompletion.length; i++) {
@@ -192,9 +192,11 @@ function setup() {
       }
     }
   }
-  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', palette.white).style('background-color', palette.black).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0); //future consideration: bugfix "Stats" button label on mobile not seeming to be centered on the button
-  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
-  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
+  const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
+  const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
+  statsButton = createButton((stats ? "x" : "Stats")).mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut).style('color', palette.white).style('background-color', palette.black).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) * 3 / 8) + 'pt').style('touch-action', 'manipulation').size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2).position(displayOffset + width - 1.6 * gameLetterSize * screenDivision + letterSpaceMultiplier * screenDivision / 20 / 2, 0);
+  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
+  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
   for (let i = 0, keyIndex = 0; i < numKeyboardRows; i++) {
     keyboard.push([]);
     for (let j = 0; j < keyboardRowIndexToNumLetterKeys[i]; j++) {
@@ -230,11 +232,11 @@ function setup() {
   keyboard[2][6].mousePressed(function() { keyTyped(this.elt.innerText); });
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
-      keyboard[i][j].style('color', palette.white).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, letterButtonHeight);
+      keyboard[i][j].style('color', palette.white).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').style('touch-action', 'manipulation').size(letterButtonWidth, min(letterButtonHeight, (lastWindowHeight - height) / 3));
     }
   }
-  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), lastWindowHeight - letterButtonHeight);
-  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
+  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), lastWindowHeight - letterButtonHeight);
+  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
   textAlign(CENTER, CENTER);
 }
 
@@ -256,11 +258,13 @@ function draw() {
   if (refreshSquares || refreshStats) {
     background(0);
   }
-  textSize((numScreenDivisions / 15) * screenDivision);
+  const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
+  const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
+  textSize(gameLetterSize * screenDivision);
   if (refreshSquares || refreshStats || newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
     stroke(255);
     fill(255);
-    text("Wordle Rx", width / 2, (numScreenDivisions / 16) * screenDivision);
+    text("Wordle Rx", width / 2, gameLetterSize * screenDivision);
   }
   if (!stats) {
     if (gameState.games[todayIndex].previousGuesses.length && gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] && !gameOver) {
@@ -268,9 +272,6 @@ function draw() {
       justEndedGameLoopCount = 2 + 2 * (!gameState.games[todayIndex].previousGuesses.slice(-1)[0] && popups.length); //extra time on loss for the user to read the answer popup
       frameRate(1.25); //found to be the only way to have the program show the game's end then the stats page shortly after (as opposed to a busy wait)
     }
-    const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
-    const gameLetterSize = min(numScreenDivisions / 15, letterSpaceMultiplier - 1); //because p5.js warns when placed directly inside textSize()
-    textSize(gameLetterSize * screenDivision);
     if (refreshSquares) {
       refreshSquares = false;
       strokeWeight(letterSpaceMultiplier * screenDivision / 20);
@@ -278,14 +279,14 @@ function draw() {
         for (let x = 0; x < wordLength; x++) {
           stroke((y < gameState.games[todayIndex].previousGuesses.length ? colors[y][x] : (y === gameState.games[todayIndex].previousGuesses.length ? (gameState.games[todayIndex].guess.length !== wordLength ? (x < gameState.games[todayIndex].guess.length ? 191 : 91) : (!validWords.includes(gameState.games[todayIndex].guess) ? palette.red : 191)) : 91)));
           fill(colors[y][x]);
-          square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, ((numScreenDivisions / 8) + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
+          square(((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + x * (letterSpaceMultiplier + 1)) * screenDivision, (1.6 * gameLetterSize + y * (letterSpaceMultiplier + 1)) * screenDivision, letterSpaceMultiplier * screenDivision);
         }
       }
       strokeWeight(1);
       stroke(255);
       fill(255);
       for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
-        const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
+        const y = (1.6 * gameLetterSize + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
         for (let j = 0; j < wordLength; j++) {
           const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + j * (letterSpaceMultiplier + 1)) * screenDivision;
           text(gameState.games[todayIndex].previousGuesses[i][j], x, y);
@@ -296,7 +297,7 @@ function draw() {
     fill((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : 255));
     for (let i = 0; i < gameState.games[todayIndex].guess.length; i++) {
       const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
-      const y = (numScreenDivisions / 8 + letterSpaceMultiplier / 2 + gameState.games[todayIndex].previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
+      const y = (1.6 * gameLetterSize + letterSpaceMultiplier / 2 + gameState.games[todayIndex].previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
       text(gameState.games[todayIndex].guess[i], x, y);
     }
     let numPopupsToDiscard = 0; //depends on popups being in order of decreasing age
@@ -324,11 +325,11 @@ function draw() {
       const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : min(newWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4)));
       for (let i = 0; i < keyboard.length; i++) {
         for (let j = 0; j < keyboard[i].length; j++) {
-          keyboard[i][j].style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, newWindowHeight - (3 - i) * min(letterButtonHeight, (newWindowHeight - height) / 3));
+          keyboard[i][j].style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').size(letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, newWindowHeight - (3 - i) * min(letterButtonHeight, (newWindowHeight - height) / 3));
         }
       }
-      enterButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
-      backspaceButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', (1.5 * screenDivision) + 'pt').size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
+      enterButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
+      backspaceButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', (3 / 8 * gameLetterSize * screenDivision) + 'pt').size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
     }
     for (let j = 0; j < keyboard.length; j++) {
       const indexOffset = (j > 0 ? keyboard[0].length + (j > 1 ? keyboard[1].length : 0) : 0);
@@ -338,50 +339,51 @@ function draw() {
     }
   }
   else {
+    const screenDivisionByHeight = height / numScreenDivisions;
     if (refreshStats) {
       stroke(0);
-      textSize(3 * screenDivision);
-      text("STATISTICS", width / 2, 10 * screenDivision);
-      textSize(4 * screenDivision);
-      text(gamesPlayed, width / 5, 16 * screenDivision);
-      text(round(100 * gamesWon / max(gamesPlayed, 1)), 2 * width / 5, 16 * screenDivision);
-      text(currentStreak, 3 * width / 5, 16 * screenDivision);
-      text(maxStreak, 4 * width / 5, 16 * screenDivision);
-      textSize(2 * screenDivision);
-      text("Played", width / 5, 20 * screenDivision);
-      text("Win %", 2 * width / 5, 20 * screenDivision);
-      text("Current", 3 * width / 5, 20 * screenDivision);
-      text("Streak", 3 * width / 5, 22 * screenDivision);
-      text("Max", 4 * width / 5, 20 * screenDivision);
-      text("Streak", 4 * width / 5, 22 * screenDivision);
-      textSize(3 * screenDivision);
-      text("GUESS DISTRIBUTION", width / 2, 28 * screenDivision);
-      textSize(2 * screenDivision);
+      const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
+      const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
+      textSize(3 * screenDivisionByHeight);
+      text("STATISTICS", width / 2, (gameLetterSize + 6) * screenDivisionByHeight);
+      textSize(4 * screenDivisionByHeight);
+      text(gamesPlayed, width / 5, (gameLetterSize + 12) * screenDivisionByHeight);
+      text(round(100 * gamesWon / max(gamesPlayed, 1)), 2 * width / 5, (gameLetterSize + 12) * screenDivisionByHeight);
+      text(currentStreak, 3 * width / 5, (gameLetterSize + 12) * screenDivisionByHeight);
+      text(maxStreak, 4 * width / 5, (gameLetterSize + 12) * screenDivisionByHeight);
+      textSize(2 * screenDivisionByHeight);
+      text("Played", width / 5, (gameLetterSize + 16) * screenDivisionByHeight);
+      text("Win %", 2 * width / 5, (gameLetterSize + 16) * screenDivisionByHeight);
+      text("Current", 3 * width / 5, (gameLetterSize + 16) * screenDivisionByHeight);
+      text("Streak", 3 * width / 5, (gameLetterSize + 18) * screenDivisionByHeight);
+      text("Max", 4 * width / 5, (gameLetterSize + 16) * screenDivisionByHeight);
+      text("Streak", 4 * width / 5, (gameLetterSize + 18) * screenDivisionByHeight);
+      textSize(3 * screenDivisionByHeight);
+      text("GUESS DISTRIBUTION", width / 2, (gameLetterSize + 24) * screenDivisionByHeight);
+      textSize(2 * screenDivisionByHeight);
       let mode = 0;
       let guessDistribution = Array.from({length: maxGuesses}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
       for (let i = 0; i < maxGuesses; i++) {
         guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
       }
       for (let i = 0; i < maxGuesses; i++) {
-        text(i + 1, (22.5 + i * 5) * screenDivision, 46 * screenDivision);
+        text(i + 1, ((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 + i * 5) * screenDivision, (gameLetterSize + 42) * screenDivisionByHeight);
         mode = max(mode, guessDistribution[i]);
       }
       for (let i = 0; i < maxGuesses; i++) {
         fill((i + 1 === gameState.games[todayIndex].previousGuesses.length ? "green" : 63));
-        rect((21.5 + i * 5) * screenDivision, 44 * screenDivision, 2 * screenDivision, -guessDistribution[i] / max(mode, 1) * 12 * screenDivision);
+        rect(((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 - 1 + i * 5) * screenDivision, (gameLetterSize + 40) * screenDivisionByHeight, 2 * screenDivision, -guessDistribution[i] / max(mode, 1) * 12 * screenDivisionByHeight);
         fill(255);
-        text(guessDistribution[i], (22.5 + i * 5) * screenDivision, (43 - guessDistribution[i] / max(mode, 1) * 12) * screenDivision);
+        text(guessDistribution[i], ((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 + i * 5) * screenDivision, ((gameLetterSize + 39) - guessDistribution[i] / max(mode, 1) * 12) * screenDivisionByHeight);
       }
       if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
-        textSize(3 * screenDivision);
-        text("NEXT DAILY", width / 2, 52 * screenDivision);
-        textSize(4.5 * screenDivision);
+        textSize(3 * screenDivisionByHeight);
+        text("NEXT DAILY", width / 2, (gameLetterSize + 48) * screenDivisionByHeight);
       }
       else if (gamesPlayed === gameState.games.length) {
-        textSize(3 * screenDivision);
+        textSize(3 * screenDivisionByHeight);
         const congratulationsText = "Congratulations, you have completed Wordle Rx! Use the blue button on the right to copy your final results for sharing. The game will automatically be reset in thirty-two days after the last completed game.";
-        text(congratulationsText, 0, 45 * screenDivision, width, height / 3);
-        textSize(4.5 * screenDivision);
+        text(congratulationsText, 0, (gameLetterSize + 41) * screenDivisionByHeight, width, height / 3);
       }
     }
     if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
@@ -389,21 +391,21 @@ function draw() {
       for (; offset < gameState.games.length && gameState.games[(todayIndex + offset) % gameState.games.length].dateCompleted === undefined; offset++) {} //because the number of played games does not equal the number of playable games, offset here will never be set to the number of playable games
       const now = new Date();
       now.setHours(24, 0, 0, 0);
-      createCountdownTimerGUI(now.setDate(now.getDate() + offset) - (new Date()).getTime(), 58 * screenDivision, screenDivision);
+      createCountdownTimerGUI(now.setDate(now.getDate() + offset) - (new Date()).getTime(), (gameLetterSize + 54) * screenDivisionByHeight, screenDivisionByHeight);
     }
     else if (gamesPlayed === gameState.games.length) { //resetPoint will have been set if gamesPlayed === gameState.games.length
-      createCountdownTimerGUI(resetPoint - (new Date()).getTime(), height - 2 * screenDivision, screenDivision);
+      createCountdownTimerGUI(resetPoint - (new Date()).getTime(), height - 2 * screenDivisionByHeight, screenDivisionByHeight);
     }
   }
   switch (justEndedGameLoopCount) {
     case 0:
-      setStatsGUI(screenDivision, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
+      setStatsGUI(screenDivision, height / numScreenDivisions, gameLetterSize, letterSpaceMultiplier, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       break;
     case 1:
       toggleStats();
       statsButton.mousePressed(toggleStats).mouseOver(statsMouseOver).mouseOut(statsMouseOut); //re-enable statsButton interactions
       frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
-      setStatsGUI(screenDivision, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
+      setStatsGUI(screenDivision, height / numScreenDivisions, gameLetterSize, letterSpaceMultiplier, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       justEndedGameLoopCount--;
       break;
     default:
@@ -449,7 +451,7 @@ function resetLocalStorage() {
 }
 
 
-function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDivision) {
+function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDivisionByHeight) {
   const secondsUntilNextPlayableGame = Math.floor(millisecondsUntilNextPlayableGame / 1000);
   if (secondsUntilNextPlayableGame !== lastSecondsUntilNextPlayableGame || refreshStats) { //lastSecondsUntilNextPlayableGame is initially undefined
     refreshStats = false;
@@ -457,20 +459,21 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
     const countdownHours = Math.floor(secondsUntilNextPlayableGame / 3600);
     const countdownMinutes = Math.floor((secondsUntilNextPlayableGame / 60) % 60);
     const countdownSeconds = secondsUntilNextPlayableGame % 60;
-    //future consideration: bugfix slight size increase of countdown timer upon opening the stats page
+    textSize(4.5 * screenDivisionByHeight);
     fill(0);
-    rect(0, y - 2.25 * screenDivision, width, 4.5 * screenDivision)
+    rect(0, y - 2 * screenDivisionByHeight, width, 4.5 * screenDivisionByHeight)
     fill(255);
     text(`${countdownHours.toString().padStart(2, "0")}:${countdownMinutes.toString().padStart(2, "0")}:${countdownSeconds.toString().padStart(2, "0")}`, width / 2, y);
   }
 }
 
 
-function setStatsGUI(screenDivision, scaleChanged) {
+function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, letterSpaceMultiplier, scaleChanged) {
   if (scaleChanged) {
-    statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(additionalScreenDivisionsForStatsButton * screenDivision, additionalScreenDivisionsForStatsButton * screenDivision).position(displayOffset + width - additionalScreenDivisionsForStatsButton * screenDivision, 0);
-    clipboardButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
-    cumulativeStatsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (2 * screenDivision) + 'pt').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
+    const maxScreenDivision = max(screenDivision, screenDivisionByHeight);
+    statsButton.style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) * 3 / 8) + 'pt').size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2).position(displayOffset + width - 1.6 * gameLetterSize * screenDivision + letterSpaceMultiplier * screenDivision / 20 / 2, 0);
+    clipboardButton.style('border-radius', (2 * maxScreenDivision) + 'px').style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt').size(18 * maxScreenDivision, 10 * maxScreenDivision).position(displayOffset + width / 2 - 18 * maxScreenDivision, height);
+    cumulativeStatsButton.style('border-radius', (2 * maxScreenDivision) + 'px').style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt').size(18 * maxScreenDivision, 10 * maxScreenDivision).position(displayOffset + width / 2, height);
   }
 }
 
