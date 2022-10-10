@@ -82,6 +82,7 @@ let refreshStats = false;
 let canvas;
 let displayOffset = 0;
 const palette = {};
+const victoryPopups = ["Ace", "Eagle", "Birdie", "Par", "Bogey", "Double Bogey", "Close One"]; //length must equal maxGuesses
 
 let colors;
 const colorsForCopying = [];
@@ -267,9 +268,9 @@ function draw() {
     text("Wordle Rx", width / 2, gameLetterSize * screenDivision);
   }
   if (!stats) {
-    if (gameState.games[todayIndex].previousGuesses.length && gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] && !gameOver) {
+    if (((gameState.games[todayIndex].previousGuesses.length && gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex]) || gameState.games[todayIndex].previousGuesses.length === maxGuesses) && !gameOver) {
       gameOver = true;
-      justEndedGameLoopCount = 2 + 2 * (!gameState.games[todayIndex].previousGuesses.slice(-1)[0] && popups.length); //extra time on loss for the user to read the answer popup
+      justEndedGameLoopCount = 2 + 2 * (!gameState.games[todayIndex].previousGuesses.slice(-1)[0] !== answers[todayIndex] && popups.length); //extra time on loss for the user to read the answer popup
       frameRate(1.25); //found to be the only way to have the program show the game's end then the stats page shortly after (as opposed to a busy wait)
     }
     if (refreshSquares) {
@@ -309,11 +310,11 @@ function draw() {
       else {
         stroke(255);
         fill(255);
-        rect(width / 2 - 7 * screenDivision, (5 + (i - numPopupsToDiscard + 1) * 6) * screenDivision, 14 * screenDivision, 4 * screenDivision, screenDivision / 2);
+        rect(width / 2 - 7 * screenDivision, (gameLetterSize + (i - numPopupsToDiscard + 1) * 6) * screenDivision, 14 * screenDivision, 4 * screenDivision, screenDivision / 2);
         stroke(0);
         fill(0);
-        textSize(1.5 * screenDivision);
-        text(label, width / 2, (7 + (i - numPopupsToDiscard + 1) * 6) * screenDivision);
+        textSize(1.65 * screenDivision);
+        text(label, width / 2, (gameLetterSize + 2 + (i - numPopupsToDiscard + 1) * 6) * screenDivision);
       }
     }
     if (numPopupsToDiscard > 0) {
@@ -363,8 +364,10 @@ function draw() {
       textSize(2 * screenDivisionByHeight);
       let mode = 0;
       let guessDistribution = Array.from({length: maxGuesses}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
-      for (let i = 0; i < maxGuesses; i++) {
-        guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
+      for (let i = 0; i < answers.length; i++) {
+        if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
+          guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
+        }
       }
       for (let i = 0; i < maxGuesses; i++) {
         text(i + 1, ((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 + i * 5) * screenDivision, (gameLetterSize + 42) * screenDivisionByHeight);
@@ -545,12 +548,12 @@ function determineResetPoint() {
 
 
 function completedDaily(won) {
-  determineResetPoint();
   gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
   gamesWon += won;
   gamesPlayed++;
   currentStreak = (won ? currentStreak + 1 : 0);
   maxStreak = max(maxStreak, currentStreak);
+  determineResetPoint();
 }
 
 
@@ -564,6 +567,7 @@ function submitGuess() {
       //future consideration: show word-submitted animation
       if (guessMatchesAnswer) { //won
         completedDaily(true);
+        popups.push({ [victoryPopups[gameState.games[todayIndex].previousGuesses.length - 1]] : Date.now() });
       }
       else if (gameState.games[todayIndex].previousGuesses.length === maxGuesses) { //lost
         completedDaily(false);
