@@ -138,7 +138,7 @@ function setup() {
   palette.gray = color("gray");
   keyboardColors = Array.from({length: 26}, () => (palette.gray)); //26 letters in the alphabet
   gameState = getItem('wordle-rx-state');
-  const expectedAttributes = (gameState !== null && (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).includes('mode') && Object.keys(gameState).includes('contrast') && Object.keys(gameState).length === 4));
+  const expectedAttributes = (gameState !== null && ((Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).includes('mode') && Object.keys(gameState).includes('contrast') && Object.keys(gameState).length === 4) || (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2))); //ORed with a condition that permits for backwards compatibility with no dark-light or (high-low) contrast modes
   if (!expectedAttributes) {
     if (gameState !== null) {
       clearRelevantLocalStorage();
@@ -147,6 +147,12 @@ function setup() {
     colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => ((gameState.mode ? palette.black : palette.white)))));
   }
   else {
+    if (gameState.mode === undefined) { //for backwards compatibility with no dark-light mode distinction
+      gameState.mode = true;
+    }
+    if (gameState.contrast === undefined) { //for backwards compatibility with no (high-low) contrast mode distinction
+      gameState.contrast = false;
+    }
     colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => ((gameState.mode ? palette.black : palette.white)))));
     if (gameState.games[todayIndex].guess || gameState.games[todayIndex].previousGuesses.length) {
       for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
