@@ -6,6 +6,8 @@ const numScreenDivisions = 70;
 const canvasWindowWidthMultiplier = 1, canvasWindowHeightMultiplier = 7 / 10;
 let validWords;
 let answers;
+let answers1;
+let answers2;
 let gameState;
 let maxFrameRate = 1.25;
 const qwertyKeysToIndices = {
@@ -110,7 +112,8 @@ let backspaceButton;
 
 function preload() {
   validWords = loadStrings("valid words.txt"); //all words must be exactly wordLength long; from https://raw.githubusercontent.com/tabatkins/wordle-list/main/words
-  answers = loadStrings("answers.txt");
+  answers1 = loadStrings("answers1.txt");
+  answers2 = loadStrings("answers2.txt");
 }
 
 
@@ -123,9 +126,11 @@ function setup() {
   const letterButtonHeight = min(width / 6, (lastWindowHeight - height) / 3);
   const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : min(lastWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4)));
   fillCanvasToSpace(letterButtonHeight);
-  validWords += answers;
   const now = new Date();
-  todayIndex = (new Date(now)).getDay();
+  todayIndex = (new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0) % 7);
+  validWords += answers1;
+  validWords += answers2;
+  answers = (0 < now.getMonth() && now.getMonth() < 7 ? answers2 : answers1);
   palette.green = color(0, 127, 0);
   palette.blue = color("blue");
   palette.yellow = color(159, 159, 0);
@@ -436,7 +441,7 @@ function draw() {
     lastWindowHeight = newWindowHeight;
   }
   const now = new Date();
-  todayIndex = (new Date(now)).getDay(); //updated at the end of the loop for being initialized before first iteration of the draw loop/function
+  todayIndex = (new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0) % 7);; //updated at the end of the loop for being initialized before first iteration of the draw loop/function
   if (gamesPlayed === answers.length && resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
     resetPoint = undefined;
     resetLocalStorage();
@@ -556,11 +561,12 @@ function determineResetPoint() {
     }
     const now = new Date();
     const startOfOctober = new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1);
-    if (startOfOctober - now > 0 && startOfOctober - now < 24 * 3600 * 1000) { //if the start of October is less than a day in the future
+    const startOfApril = new Date(now.getFullYear() + (now.getMonth() < 3 ? 0 : 1), 3, 1);
+    if (0 < startOfApril - now && startOfApril - now < 24 * 3600 * 1000 || 0 < startOfOctober - now && startOfOctober - now < 24 * 3600 * 1000) { //if the start of April or October is less than a day in the future
       resetPoint = (new Date()).setDate(now.getDate() + 32); //reset point is thirty-two days in the future
     }
     else {
-      resetPoint = (new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1)).getTime(); //reset point is the next beginning of the month of October (so as to reset at the beginning of U.S. American Pharmacists Month or with plenty of time before National Pharmacy Week in the third week of October)
+      resetPoint = min((new Date(now.getFullYear() + (now.getMonth() < 3 ? 0 : 1), 3, 1)).getTime(), new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1).getTime()); //reset point is the next beginning of the month of April or October (so as to reset at the beginning of either U.S. National Nurses Month or U.S. American Pharmacists Month or with plenty of time before either National Nurses Week in the second week of May or National Pharmacy Week in the third week of October)
     }
   }
 }

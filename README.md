@@ -17,7 +17,7 @@
 
 ## Description
 
-This program allows for playing the popular [Wordle](https://www.nytimes.com/games/wordle/index.html) game where the answers (repeated weekly) are seven common medical/pharmacy terms for National Pharmacy Week!  
+This program allows for playing the popular [Wordle](https://www.nytimes.com/games/wordle/index.html) game where the answers (repeated weekly) are seven common medical/nursing terms for National Nurses Week and seven common medical/pharmacy terms for National Pharmacy Week!  
 Start date: August 23, 2022  
 Current version: 1.0.0  
 
