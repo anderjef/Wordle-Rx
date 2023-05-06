@@ -127,7 +127,7 @@ function setup() {
   const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : min(lastWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4)));
   fillCanvasToSpace(letterButtonHeight);
   const now = new Date();
-  todayIndex = (new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0) % 7);
+  todayIndex = ((new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0))) % 7;
   validWords += answers1;
   validWords += answers2;
   answers = (0 < now.getMonth() && now.getMonth() < 7 ? answers2 : answers1);
@@ -441,7 +441,7 @@ function draw() {
     lastWindowHeight = newWindowHeight;
   }
   const now = new Date();
-  todayIndex = (new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0) % 7);; //updated at the end of the loop for being initialized before first iteration of the draw loop/function
+  todayIndex = ((new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0))) % 7; //updated at the end of the loop for being initialized before first iteration of the draw loop/function
   if (gamesPlayed === answers.length && resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
     resetPoint = undefined;
     resetLocalStorage();
