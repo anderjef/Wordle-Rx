@@ -37,7 +37,7 @@ The black is the provided display area.
 
 ### Programming language(s)
 
-- p5.js (JavaScript)
+- JavaScript
   - [sketch.js](sketch.js)&mdash;main program entrance containing all pertinent code
 
 ## Installation
@@ -51,7 +51,7 @@ The black is the provided display area.
 ### Invokation
 
 1. Method 1&mdash;p5.js in web browser
-    - Open <https://anderjef.github.io/Wordle-Rx/>.
+    - Go to <https://anderjef.github.io/Wordle-Rx/>.
 2. Method 2&mdash;p5.js Web Editor
     - See [Installation](#installation).
 
