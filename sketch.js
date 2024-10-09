@@ -1,5 +1,3 @@
-//Jeffrey Andersen
-
 const wordLength = 5;
 const maxGuesses = 7;
 const numScreenDivisions = 70;
