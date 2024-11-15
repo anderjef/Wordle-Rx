@@ -446,6 +446,10 @@ function draw() {
   }
 }
 
+/**
+ * 
+ * @param {int} letterButtonHeight The height of the letter buttons
+ */
 function fillCanvasToSpace(letterButtonHeight) {
   if (height < windowHeight - letterButtonHeight * 3) {
     resizeCanvas(width, windowHeight - letterButtonHeight * 3);
@@ -453,6 +457,10 @@ function fillCanvasToSpace(letterButtonHeight) {
 }
 
 
+/**
+ * 
+ * @param {boolean} [alert=true] Whether to show an alert regarding mismatched local storage data
+ */
 function clearRelevantLocalStorage(alert = true) {
   if (alert) {
     window.alert("Properties of game state local storage did not match expected attributes, so clearing all local storage Wordle Rx data.");
@@ -473,6 +481,12 @@ function resetLocalStorage() {
 }
 
 
+/**
+ * 
+ * @param {number} millisecondsUntilNextPlayableGame The number of milliseconds until the next playable game
+ * @param {number} y The base y coordinate of the top left corner of the region to be occupied by the countdown timer, to be reduced by two screen division heights
+ * @param {number} screenDivisionByHeight The height of a screen division
+ */
 function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDivisionByHeight) {
   const secondsUntilNextPlayableGame = Math.floor(millisecondsUntilNextPlayableGame / 1000);
   if (secondsUntilNextPlayableGame !== lastSecondsUntilNextPlayableGame || refreshStats) { //lastSecondsUntilNextPlayableGame is initially undefined
@@ -490,6 +504,14 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
 }
 
 
+/**
+ * 
+ * @param {int} screenDivision The width of a screen division
+ * @param {number} screenDivisionByHeight The height of a screen division
+ * @param {int} gameLetterSize The size of game letters, in screen divisions
+ * @param {int} letterSpaceMultiplier A multiplier for the amount of space that letters are given, other than for the game title text
+ * @param {boolean} scaleChanged Whether the scale has changed since the last time the stats GUI was styled
+ */
 function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, letterSpaceMultiplier, scaleChanged) {
   if (scaleChanged) {
     const maxScreenDivision = max(screenDivision, screenDivisionByHeight);
@@ -502,6 +524,12 @@ function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, let
 }
 
 
+/**
+ * 
+ * @param {string} guess The current guess
+ * @param {int} guessIndex The index of the current guess
+ * @param {boolean} [isWinningGuess=false] Whether the current guess matches the answer
+ */
 function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = false) {
   colorsForCopying.push([]);
   if (isWinningGuess) {
@@ -569,6 +597,10 @@ function determineResetPoint() {
 }
 
 
+/**
+ * 
+ * @param {boolean} won Whether the current game was won
+ */
 function completedDaily(won) {
   gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
   gamesWon += won;
@@ -660,6 +692,10 @@ function pressedKey(key) {
 }
 
 
+/**
+ * 
+ * @param {string} k The typed key
+ */
 function keyTyped(k) {
   switch (key) {
     case 'a':
@@ -870,6 +906,11 @@ function blackButtonMouseOut() {
 }
 
 
+/**
+ * 
+ * @param {string} text The text to copy to the clipboard
+ * @param {string} [alertText=""] The text to show in an alert, if any
+ */
 function setClipboard(text, alertText = "") { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
@@ -978,6 +1019,11 @@ function copyStats() { //expects gamesWon !== 0
 }
 
 
+/**
+ * 
+ * @param {string} str What to hash
+ * @returns The hash
+ */
 function hashCode(str) { //inspired by https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
