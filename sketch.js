@@ -9,16 +9,16 @@ let answers2;
 let gameState;
 let maxFrameRate = 1.25;
 const qwertyKeysToIndices = {
-  Q:  0,
-  W:  1,
-  E:  2,
-  R:  3,
-  T:  4,
-  Y:  5,
-  U:  6,
-  I:  7,
-  O:  8,
-  P:  9,
+  Q: 0,
+  W: 1,
+  E: 2,
+  R: 3,
+  T: 4,
+  Y: 5,
+  U: 6,
+  I: 7,
+  O: 8,
+  P: 9,
   A: 10,
   S: 11,
   D: 12,
@@ -48,16 +48,16 @@ const keyboardRowsLeftOffset = {
   2: 1.5,
 };
 const indicesToQwertyKeys = {
-   0: 'Q',
-   1: 'W',
-   2: 'E',
-   3: 'R',
-   4: 'T',
-   5: 'Y',
-   6: 'U',
-   7: 'I',
-   8: 'O',
-   9: 'P',
+  0: 'Q',
+  1: 'W',
+  2: 'E',
+  3: 'R',
+  4: 'T',
+  5: 'Y',
+  6: 'U',
+  7: 'I',
+  8: 'O',
+  9: 'P',
   10: 'A',
   11: 'S',
   12: 'D',
@@ -139,7 +139,7 @@ function setup() {
   palette.white = color("white");
   palette.black = color("black");
   palette.gray = color("gray");
-  keyboardColors = Array.from({length: 26}, () => (palette.gray)); //26 letters in the alphabet
+  keyboardColors = Array.from({ length: 26 }, () => (palette.gray)); //26 letters in the alphabet
   gameState = getItem('wordle-rx-state');
   const expectedAttributes = (gameState !== null && ((Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).includes('mode') && Object.keys(gameState).includes('contrast') && Object.keys(gameState).length === 4) || (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2))); //ORed with a condition that permits for backwards compatibility with no dark-light or (high-low) contrast modes
   if (!expectedAttributes) {
@@ -147,7 +147,7 @@ function setup() {
       clearRelevantLocalStorage();
     }
     resetLocalStorage();
-    colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => ((gameState.mode ? palette.black : palette.white)))));
+    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
   }
   else {
     if (gameState.mode === undefined) { //for backwards compatibility with no dark-light mode distinction
@@ -156,7 +156,7 @@ function setup() {
     if (gameState.contrast === undefined) { //for backwards compatibility with no (high-low) contrast mode distinction
       gameState.contrast = false;
     }
-    colors = Array.from({length: maxGuesses}, () => (Array.from({length: wordLength}, () => ((gameState.mode ? palette.black : palette.white)))));
+    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
     if (gameState.games[todayIndex].guess || gameState.games[todayIndex].previousGuesses.length) {
       for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
         updateColorsForClipboardAndGUI(gameState.games[todayIndex].previousGuesses[i], i);
@@ -174,7 +174,7 @@ function setup() {
     for (let i = 0; i < gamesSortedByCompletion.length; i++) {
       gamesSortedByCompletion[i].gameIndex = i; //for later comparing the final guess to the correct answer in the list of answers
     }
-    gamesSortedByCompletion.sort(function(a, b) {
+    gamesSortedByCompletion.sort(function (a, b) {
       if (a.dateCompleted !== undefined && b.dateCompleted !== undefined) {
         return (new Date(a.dateCompleted)) - (new Date(b.dateCompleted));
       }
@@ -221,32 +221,32 @@ function setup() {
       keyIndex++;
     }
   }
-  keyboard[0][0].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][1].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][2].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][3].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][4].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][5].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][6].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][7].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][8].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[0][9].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][0].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][1].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][2].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][3].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][4].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][5].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][6].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][7].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[1][8].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][0].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][1].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][2].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][3].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][4].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][5].mousePressed(function() { keyTyped(this.elt.innerText); });
-  keyboard[2][6].mousePressed(function() { keyTyped(this.elt.innerText); });
+  keyboard[0][0].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][1].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][2].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][3].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][4].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][5].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][6].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][7].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][8].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[0][9].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][0].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][1].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][2].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][3].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][4].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][5].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][6].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][7].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[1][8].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][0].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][1].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][2].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][3].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][4].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][5].mousePressed(function () { keyTyped(this.elt.innerText); });
+  keyboard[2][6].mousePressed(function () { keyTyped(this.elt.innerText); });
   const keyboardFontSize = min((3 / 8 * gameLetterSize * screenDivision), 0.4 * letterButtonWidth) + 'pt'; //capping font size at 0.4 * letterButtonWidth is to keep the Enter key's text from overflowing its button width
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
@@ -381,7 +381,7 @@ function draw() {
       text("GUESS DISTRIBUTION", width / 2, (gameLetterSize + 24) * screenDivisionByHeight);
       textSize(2 * screenDivisionByHeight);
       let mode = 0;
-      let guessDistribution = Array.from({length: maxGuesses}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
+      let guessDistribution = Array.from({ length: maxGuesses }, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
       for (let i = 0; i < answers.length; i++) {
         if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
           guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
@@ -409,7 +409,7 @@ function draw() {
     }
     if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
       let offset = 0;
-      for (; offset < gameState.games.length && gameState.games[(todayIndex + offset) % gameState.games.length].dateCompleted === undefined; offset++) {} //because the number of played games does not equal the number of playable games, offset here will never be set to the number of playable games
+      for (; offset < gameState.games.length && gameState.games[(todayIndex + offset) % gameState.games.length].dateCompleted === undefined; offset++) { } //because the number of played games does not equal the number of playable games, offset here will never be set to the number of playable games
       const now = new Date();
       now.setHours(24, 0, 0, 0);
       createCountdownTimerGUI(now.setDate(now.getDate() + offset) - (new Date()).getTime(), (gameLetterSize + 54) * screenDivisionByHeight, screenDivisionByHeight);
@@ -430,7 +430,7 @@ function draw() {
       justEndedGameLoopCount--;
       break;
     default:
-      statsButton.mousePressed(function() {}).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
+      statsButton.mousePressed(function () { }).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
       justEndedGameLoopCount--;
       break;
   }
@@ -445,7 +445,6 @@ function draw() {
     resetLocalStorage();
   }
 }
-
 
 function fillCanvasToSpace(letterButtonHeight) {
   if (height < windowHeight - letterButtonHeight * 3) {
@@ -470,7 +469,7 @@ function resetLocalStorage() {
     mode: true, //whether to use dark mode
     contrast: false, //whether to use high contrast
   };
-  gameState.games = Array.from({length: answers.length}, () => ({guess: "", previousGuesses: []}));
+  gameState.games = Array.from({ length: answers.length }, () => ({ guess: "", previousGuesses: [] }));
 }
 
 
@@ -590,21 +589,21 @@ function submitGuess() {
       //future consideration: show word-submitted animation
       if (guessMatchesAnswer) { //won
         completedDaily(true);
-        popups.push({ [victoryPopups[gameState.games[todayIndex].previousGuesses.length - 1]] : Date.now() });
+        popups.push({ [victoryPopups[gameState.games[todayIndex].previousGuesses.length - 1]]: Date.now() });
       }
       else if (gameState.games[todayIndex].previousGuesses.length === maxGuesses) { //lost
         completedDaily(false);
-        popups.push({ [answers[todayIndex]] : Date.now() });
+        popups.push({ [answers[todayIndex]]: Date.now() });
       }
       refreshSquares = true;
     }
     else {
-      popups.push({ "Not in word list" : Date.now() });
+      popups.push({ "Not in word list": Date.now() });
       //future consideration: show not-in-word-list error animation
     }
   }
   else {
-      popups.push({ "Not enough letters" : Date.now() });
+    popups.push({ "Not enough letters": Date.now() });
     //future consideration: show not-enough-letters error animation
   }
 }
@@ -871,7 +870,7 @@ function blackButtonMouseOut() {
 }
 
 
-function setClipboard(text, alertText="") { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
+function setClipboard(text, alertText = "") { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
   let temp = document.createElement("textarea");
   document.body.appendChild(temp);
   temp.value = text;
@@ -918,7 +917,7 @@ function copyStats() { //expects gamesWon !== 0
   cumulativeStatsButton.style('background-color', palette.darkBlue); //reset button background color to indicate button was pressed
   let mean = 0;
   const guessCountsSorted = [];
-  let modeTempArray = Array.from({length: gameState.games.length}, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
+  let modeTempArray = Array.from({ length: gameState.games.length }, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
   const scores = []; //"x" for unattempted, "X" for failed attempt, one more than how many guesses were taken with "+" appended for started but incomplete games, or how many guesses it took
   for (let i = 0; i < gameState.games.length; i++) {
     if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
@@ -936,7 +935,7 @@ function copyStats() { //expects gamesWon !== 0
   }
   mean /= gamesWon;
   mean.toFixed(2);
-  guessCountsSorted.sort(function(a, b) { return a - b; });
+  guessCountsSorted.sort(function (a, b) { return a - b; });
   guessCountsSorted.concat(new Array(gamesPlayed - gamesWon).fill("X"));
   let median = (gamesPlayed ? "X" : undefined);
   if (guessCountsSorted.length) {
