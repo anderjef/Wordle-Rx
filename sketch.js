@@ -1,3 +1,5 @@
+'use strict';
+
 const wordLength = 5;
 const maxGuesses = 7;
 const numScreenDivisions = 70;
@@ -116,6 +118,9 @@ function preload() {
 
 
 function setup() {
+  if (document.URL.startsWith("blob:https://preview.p5js.org/")) {
+    window.open(document.URL);
+  }
   lastWindowWidth = windowWidth;
   lastWindowHeight = windowHeight;
   displayOffset = lastWindowWidth / 2 - min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight) / 2;
@@ -911,16 +916,14 @@ function blackButtonMouseOut() {
  * @param {string} text The text to copy to the clipboard
  * @param {string} [alertText=""] The text to show in an alert, if any
  */
-function setClipboard(text, alertText = "") { //inspired by https://www.codegrepper.com/code-examples/html/p5.js+copy+value+to+clipboard
-  let temp = document.createElement("textarea");
-  document.body.appendChild(temp);
-  temp.value = text;
-  temp.select();
-  document.execCommand("copy");
-  document.body.removeChild(temp);
-  if (alertText) {
-    window.alert(alertText);
-  }
+async function setClipboard(text, alertText = "") {
+  await navigator.clipboard.writeText(text)
+    .then(() => {
+      if (alertText) {
+        window.alert(alertText);
+      }
+    }, () => new Promise((resolve) => setTimeout(resolve, 200)))
+    .catch(e => console.error(e.message));
 }
 
 
