@@ -84,7 +84,8 @@ let refreshStats = false;
 let canvas;
 let displayOffset = 0;
 const palette = {};
-const victoryPopups = ["Ace", "Eagle", "Birdie", "Par", "Bogey", "Double Bogey", "Close One"]; //length must equal maxGuesses
+const victoryPopups = ["Ace", "Eagle", "Birdie", "Par", "Bogey", "Double Bogey", "Close One"];
+console.assert(victoryPopups.length === maxGuesses);
 
 let colors;
 const colorsForCopying = [];
@@ -111,7 +112,7 @@ let backspaceButton;
 
 
 function preload() {
-  validWords = loadStrings("valid words.txt"); //all words must be exactly wordLength long; from https://raw.githubusercontent.com/tabatkins/wordle-list/main/words
+  validWords = loadStrings("valid words.txt"); //all words must be exactly wordLength long
   answers1 = loadStrings("answers1.txt");
   answers2 = loadStrings("answers2.txt");
 }
@@ -124,7 +125,8 @@ function setup() {
   lastWindowWidth = windowWidth;
   lastWindowHeight = windowHeight;
   displayOffset = lastWindowWidth / 2 - min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight) / 2;
-  canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)).position(displayOffset); //the canvas size here is a decent starting approximation to be corrected slightly if the display area is tall enough relative to its width to fill the gap between the canvas bottom and the top of the on-screen keyboard
+  canvas = createCanvas(min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight), min(canvasWindowWidthMultiplier * lastWindowWidth, canvasWindowHeightMultiplier * lastWindowHeight)) //the canvas size here is a decent starting approximation to be corrected slightly if the display area is tall enough relative to its width to fill the gap between the canvas bottom and the top of the on-screen keyboard
+    .position(displayOffset);
   const screenDivision = width / numScreenDivisions;
   const letterButtonHeight = min(width / 6, (lastWindowHeight - height) / 3);
   const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : min(lastWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4)));
@@ -145,7 +147,7 @@ function setup() {
   palette.black = color("black");
   palette.gray = color("gray");
   keyboardColors = Array.from({ length: 26 }, () => (palette.gray)); //26 letters in the alphabet
-  gameState = getItem('wordle-rx-state');
+  gameState = getItem('wordle-rx-state'); //TODO: rename 'mode' attribute to 'theme'
   const expectedAttributes = (gameState !== null && ((Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).includes('mode') && Object.keys(gameState).includes('contrast') && Object.keys(gameState).length === 4) || (Object.keys(gameState).includes('ID') && Object.keys(gameState).includes('games') && Object.keys(gameState).length === 2))); //ORed with a condition that permits for backwards compatibility with no dark-light or (high-low) contrast modes
   if (!expectedAttributes) {
     if (gameState !== null) {
@@ -155,10 +157,10 @@ function setup() {
     colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
   }
   else {
-    if (gameState.mode === undefined) { //for backwards compatibility with no dark-light mode distinction
+    if (gameState.mode === undefined) { //for backwards compatibility with no dark/light mode distinction
       gameState.mode = true;
     }
-    if (gameState.contrast === undefined) { //for backwards compatibility with no (high-low) contrast mode distinction
+    if (gameState.contrast === undefined) { //for backwards compatibility with no (high/low) contrast mode distinction
       gameState.contrast = false;
     }
     colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
@@ -214,52 +216,113 @@ function setup() {
   }
   const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
   const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
-  darkModeButton = createButton((gameState.mode ? "\u263C" : "\u263E")).mousePressed(toggleDarkMode).mouseOver(blackButtonMouseOver).mouseOut(blackButtonMouseOut).style('border-radius', (2 * screenDivision) + 'px').style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt').style('touch-action', 'manipulation').style('border', 'none').style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2).position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-  contrastButton = createButton((gameState.contrast ? "\u25D0" : "\u25D1")).mousePressed(toggleContrast).mouseOver(blackButtonMouseOver).mouseOut(blackButtonMouseOut).style('border-radius', (2 * screenDivision) + 'px').style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt').style('touch-action', 'manipulation').style('border', 'none').style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2).position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-  statsButton = createImg("assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico", (stats ? "Return to game" : "See statistics")).mousePressed(toggleStats).mouseOver(blackButtonMouseOver).mouseOut(blackButtonMouseOut).style('border-radius', (2 * screenDivision) + 'px').style('touch-action', 'manipulation').style('border', 'none').style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2).position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-  clipboardButton = createButton("Copy to clipboard").mousePressed(copyDaily).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2 - 18 * screenDivision, height);
-  cumulativeStatsButton = createButton("Copy to-date weekly stats").mousePressed(copyStats).mouseOver(blueButtonMouseOver).mouseOut(blueButtonMouseOut).style('color', palette.white).style('background-color', palette.darkBlue).style('display', (stats && gameOver ? '' : 'none')).style('border-radius', (2 * screenDivision) + 'px').style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt').style('touch-action', 'manipulation').size(18 * screenDivision, 10 * screenDivision).position(displayOffset + width / 2, height);
+  darkModeButton = createButton((gameState.mode ? "\u263C" : "\u263E"))
+    .mousePressed(toggleDarkMode)
+    .mouseOver(blackButtonMouseOver)
+    .mouseOut(blackButtonMouseOut)
+    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
+    .style('touch-action', 'manipulation')
+    .style('border', 'none')
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
+    .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+  contrastButton = createButton((gameState.contrast ? "\u25D0" : "\u25D1"))
+    .mousePressed(toggleContrast)
+    .mouseOver(blackButtonMouseOver)
+    .mouseOut(blackButtonMouseOut)
+    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
+    .style('touch-action', 'manipulation')
+    .style('border', 'none')
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
+    .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+  statsButton = createImg("assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico", (stats ? "Return to game" : "See statistics"))
+    .mousePressed(toggleStats)
+    .mouseOver(blackButtonMouseOver)
+    .mouseOut(blackButtonMouseOut)
+    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('touch-action', 'manipulation')
+    .style('border', 'none')
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
+    .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+  clipboardButton = createButton("Copy to clipboard")
+    .mousePressed(copyDaily)
+    .mouseOver(blueButtonMouseOver)
+    .mouseOut(blueButtonMouseOut)
+    .style('color', palette.white)
+    .style('background-color', palette.darkBlue)
+    .style('display', (stats && gameOver ? '' : 'none'))
+    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
+    .style('touch-action', 'manipulation')
+    .size(18 * screenDivision, 10 * screenDivision)
+    .position(displayOffset + width / 2 - 18 * screenDivision, height);
+  cumulativeStatsButton = createButton("Copy to-date weekly stats")
+    .mousePressed(copyStats)
+    .mouseOver(blueButtonMouseOver)
+    .mouseOut(blueButtonMouseOut)
+    .style('color', palette.white)
+    .style('background-color', palette.darkBlue)
+    .style('display', (stats && gameOver ? '' : 'none'))
+    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
+    .style('touch-action', 'manipulation')
+    .size(18 * screenDivision, 10 * screenDivision)
+    .position(displayOffset + width / 2, height);
   for (let i = 0, keyIndex = 0; i < numKeyboardRows; i++) {
     keyboard.push([]);
     for (let j = 0; j < keyboardRowIndexToNumLetterKeys[i]; j++) {
-      keyboard[i].push(createButton(indicesToQwertyKeys[keyIndex]).style('background-color', keyboardColors[keyIndex]).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, lastWindowHeight - (3 - i) * letterButtonHeight));
+      keyboard[i].push(
+        createButton(indicesToQwertyKeys[keyIndex])
+          .style('background-color', keyboardColors[keyIndex])
+          .position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, lastWindowHeight - (3 - i) * letterButtonHeight));
       keyIndex++;
     }
   }
-  keyboard[0][0].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][1].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][2].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][3].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][4].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][5].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][6].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][7].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][8].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[0][9].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][0].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][1].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][2].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][3].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][4].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][5].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][6].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][7].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[1][8].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][0].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][1].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][2].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][3].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][4].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][5].mousePressed(function () { keyTyped(this.elt.innerText); });
-  keyboard[2][6].mousePressed(function () { keyTyped(this.elt.innerText); });
+  for (let i = 0; i < 10; i++) {
+    keyboard[0][i].mousePressed(function () { keyTyped(this.elt.innerText); });
+  }
+  for (let i = 0; i < 9; i++) {
+    keyboard[1][i].mousePressed(function () { keyTyped(this.elt.innerText); });
+  }
+  for (let i = 0; i < 7; i++) {
+    keyboard[2][i].mousePressed(function () { keyTyped(this.elt.innerText); });
+  }
   const keyboardFontSize = min((3 / 8 * gameLetterSize * screenDivision), 0.4 * letterButtonWidth) + 'pt'; //capping font size at 0.4 * letterButtonWidth is to keep the Enter key's text from overflowing its button width
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
-      keyboard[i][j].style('color', palette.white).style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).style('touch-action', 'manipulation').size(letterButtonWidth, min(letterButtonHeight, (lastWindowHeight - height) / 3));
+      keyboard[i][j]
+        .style('color', palette.white)
+        .style('border-radius', ceil(screenDivision) + 'px')
+        .style('font-size', keyboardFontSize)
+        .style('touch-action', 'manipulation')
+        .size(letterButtonWidth, min(letterButtonHeight, (lastWindowHeight - height) / 3));
     }
   }
-  enterButton = createButton("Enter").mousePressed(submitGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), lastWindowHeight - letterButtonHeight);
-  backspaceButton = createButton("←").mousePressed(removeLetterFromGuess).style('color', palette.white).style('background-color', palette.gray).style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).style('touch-action', 'manipulation').size(1.5 * letterButtonWidth, letterButtonHeight).position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
+  enterButton = createButton("Enter")
+    .mousePressed(submitGuess)
+    .style('color', palette.white)
+    .style('background-color', palette.gray)
+    .style('border-radius', ceil(screenDivision) + 'px')
+    .style('font-size', keyboardFontSize)
+    .style('touch-action', 'manipulation')
+    .size(1.5 * letterButtonWidth, letterButtonHeight)
+    .position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), lastWindowHeight - letterButtonHeight);
+  backspaceButton = createButton("←")
+    .mousePressed(removeLetterFromGuess)
+    .style('color', palette.white)
+    .style('background-color', palette.gray)
+    .style('border-radius', ceil(screenDivision) + 'px')
+    .style('font-size', keyboardFontSize)
+    .style('touch-action', 'manipulation')
+    .size(1.5 * letterButtonWidth, letterButtonHeight)
+    .position(displayOffset + (canvasWindowWidthMultiplier * lastWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, lastWindowHeight - letterButtonHeight);
   textAlign(CENTER, CENTER);
 }
 
@@ -270,7 +333,6 @@ function draw() {
   if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
     displayOffset = newWindowWidth / 2 - min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight) / 2;
     resizeCanvas(min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight), min(canvasWindowWidthMultiplier * newWindowWidth, canvasWindowHeightMultiplier * newWindowHeight)); //the canvas size here is a decent starting approximation to be corrected slightly if the display area is tall enough relative to its width to fill the gap between the canvas bottom and the top of the on-screen keyboard
-    const screenDivisionTemp = width / numScreenDivisions;
     fillCanvasToSpace(width / 6);
     canvas.position(displayOffset);
     refreshSquares = !stats;
@@ -349,11 +411,23 @@ function draw() {
       const keyboardFontSize = min((3 / 8 * gameLetterSize * screenDivision), 0.4 * letterButtonWidth) + 'pt'; //capping font size at 0.4 * letterButtonWidth is to keep the Enter key's text from overflowing its button width
       for (let i = 0; i < keyboard.length; i++) {
         for (let j = 0; j < keyboard[i].length; j++) {
-          keyboard[i][j].style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).size(letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, newWindowHeight - (3 - i) * min(letterButtonHeight, (newWindowHeight - height) / 3));
+          keyboard[i][j]
+            .style('border-radius', ceil(screenDivision) + 'px')
+            .style('font-size', keyboardFontSize)
+            .size(letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3))
+            .position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + (keyboardRowsLeftOffset[i] + j) * letterButtonWidth, newWindowHeight - (3 - i) * min(letterButtonHeight, (newWindowHeight - height) / 3));
         }
       }
-      enterButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
-      backspaceButton.style('border-radius', ceil(screenDivision) + 'px').style('font-size', keyboardFontSize).size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3)).position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
+      enterButton
+        .style('border-radius', ceil(screenDivision) + 'px')
+        .style('font-size', keyboardFontSize)
+        .size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3))
+        .position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2), newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
+      backspaceButton
+        .style('border-radius', ceil(screenDivision) + 'px')
+        .style('font-size', keyboardFontSize)
+        .size(1.5 * letterButtonWidth, min(letterButtonHeight, (newWindowHeight - height) / 3))
+        .position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
     }
     for (let i = 0; i < keyboard.length; i++) {
       const indexOffset = (i > 0 ? keyboard[0].length + (i > 1 ? keyboard[1].length : 0) : 0);
@@ -429,13 +503,19 @@ function draw() {
       break;
     case 1:
       toggleStats();
-      statsButton.mousePressed(toggleStats).mouseOver(blackButtonMouseOver).mouseOut(blackButtonMouseOut); //re-enable statsButton interactions
+      statsButton //re-enable statsButton
+        .mousePressed(toggleStats)
+        .mouseOver(blackButtonMouseOver)
+        .mouseOut(blackButtonMouseOut);
       frameRate(floor(maxFrameRate)); //reset frame rate to an optimistic approximation
       setStatsGUI(screenDivision, height / numScreenDivisions, gameLetterSize, letterSpaceMultiplier, newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight);
       justEndedGameLoopCount--;
       break;
     default:
-      statsButton.mousePressed(function () { }).mouseOver(false).mouseOut(false); //disable statsButton interaction during countdown/"animation"
+      statsButton //disable statsButton during countdown/"animation"
+        .mousePressed(function () { })
+        .mouseOver(false)
+        .mouseOut(false);
       justEndedGameLoopCount--;
       break;
   }
@@ -520,11 +600,36 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
 function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, letterSpaceMultiplier, scaleChanged) {
   if (scaleChanged) {
     const maxScreenDivision = max(screenDivision, screenDivisionByHeight);
-    darkModeButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt').size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2).position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-    contrastButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).style('border-radius', (2 * screenDivision) + 'px').style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt').size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2).position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-    statsButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white)).style('border-radius', (2 * screenDivision) + 'px').size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2).position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-    clipboardButton.style('border-radius', (2 * maxScreenDivision) + 'px').style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt').size(18 * maxScreenDivision, 10 * maxScreenDivision).position(displayOffset + width / 2 - 18 * maxScreenDivision, height);
-    cumulativeStatsButton.style('border-radius', (2 * maxScreenDivision) + 'px').style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt').size(18 * maxScreenDivision, 10 * maxScreenDivision).position(displayOffset + width / 2, height);
+    darkModeButton
+      .style('color', (gameState.mode ? palette.white : palette.black))
+      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('border-radius', (2 * screenDivision) + 'px')
+      .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
+      .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
+      .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+    contrastButton
+      .style('color', (gameState.mode ? palette.white : palette.black))
+      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('border-radius', (2 * screenDivision) + 'px')
+      .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
+      .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
+      .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+    statsButton
+      .style('color', (gameState.mode ? palette.white : palette.black))
+      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('border-radius', (2 * screenDivision) + 'px')
+      .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
+      .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
+    clipboardButton
+      .style('border-radius', (2 * maxScreenDivision) + 'px')
+      .style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt')
+      .size(18 * maxScreenDivision, 10 * maxScreenDivision)
+      .position(displayOffset + width / 2 - 18 * maxScreenDivision, height);
+    cumulativeStatsButton
+      .style('border-radius', (2 * maxScreenDivision) + 'px')
+      .style('font-size', (3 / 4 * (10 * maxScreenDivision) / 4) + 'pt')
+      .size(18 * maxScreenDivision, 10 * maxScreenDivision)
+      .position(displayOffset + width / 2, height);
   }
 }
 
@@ -593,10 +698,10 @@ function determineResetPoint() {
     const startOfOctober = new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1);
     const startOfApril = new Date(now.getFullYear() + (now.getMonth() < 3 ? 0 : 1), 3, 1);
     if (0 < startOfApril - now && startOfApril - now < 24 * 3600 * 1000 || 0 < startOfOctober - now && startOfOctober - now < 24 * 3600 * 1000) { //if the start of April or October is less than a day in the future
-      resetPoint = (new Date()).setDate(now.getDate() + 32); //reset point is thirty-two days in the future
+      resetPoint = (new Date()).setDate(now.getDate() + 32); //thirty-two days in the future
     }
     else {
-      resetPoint = min((new Date(now.getFullYear() + (now.getMonth() < 3 ? 0 : 1), 3, 1)).getTime(), new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1).getTime()); //reset point is the next beginning of the month of April or October (so as to reset at the beginning of either U.S. National Nurses Month or U.S. American Pharmacists Month or with plenty of time before either National Nurses Week in the second week of May or National Pharmacy Week in the third week of October)
+      resetPoint = min((new Date(now.getFullYear() + (now.getMonth() < 3 ? 0 : 1), 3, 1)).getTime(), new Date(now.getFullYear() + (now.getMonth() < 9 ? 0 : 1), 9, 1).getTime()); //reset to the next beginning of the month of April or October (so as to reset at the beginning of either U.S. National Nurses Month or U.S. American Pharmacists Month or with plenty of time before either National Nurses Week in the second week of May or National Pharmacy Week in the third week of October)
     }
   }
 }
@@ -607,7 +712,7 @@ function determineResetPoint() {
  * @param {boolean} won Whether the current game was won
  */
 function completedDaily(won) {
-  gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it's irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
+  gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it is irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
   gamesWon += won;
   gamesPlayed++;
   currentStreak = (won ? currentStreak + 1 : 0);
@@ -623,7 +728,7 @@ function submitGuess() {
       updateColorsForClipboardAndGUI(gameState.games[todayIndex].guess, gameState.games[todayIndex].previousGuesses.length, guessMatchesAnswer);
       gameState.games[todayIndex].previousGuesses.push(gameState.games[todayIndex].guess);
       gameState.games[todayIndex].guess = "";
-      //future consideration: show word-submitted animation
+      //TODO: word-submitted animation
       if (guessMatchesAnswer) { //won
         completedDaily(true);
         popups.push({ [victoryPopups[gameState.games[todayIndex].previousGuesses.length - 1]]: Date.now() });
@@ -636,12 +741,12 @@ function submitGuess() {
     }
     else {
       popups.push({ "Not in word list": Date.now() });
-      //future consideration: show not-in-word-list error animation
+      //TODO: not-in-word-list error animation
     }
   }
   else {
     popups.push({ "Not enough letters": Date.now() });
-    //future consideration: show not-enough-letters error animation
+    //TODO: not-enough-letters error animation
   }
 }
 
@@ -685,24 +790,8 @@ function keyPressed() {
 }
 
 
-function pressedKey(key) {
-  if (!stats && !gameOver) {
-    if (gameState.games[todayIndex].guess.length < wordLength) {
-      gameState.games[todayIndex].guess += key.toUpperCase();
-      //future consideration: show letter-appended-to-guess animation
-      saveState();
-    }
-    refreshSquares = true;
-  }
-}
-
-
-/**
- * 
- * @param {string} k The typed key
- */
-function keyTyped(k) {
-  switch (key) {
+function isLetter(str) {
+  switch (str) {
     case 'a':
     case 'b':
     case 'c':
@@ -755,70 +844,41 @@ function keyTyped(k) {
     case 'X':
     case 'Y':
     case 'Z':
-      if (!stats && !gameOver) {
-        pressedKey(key);
-      }
-      break;
+      return true;
     default:
-      switch (k) {
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-        case 'h':
-        case 'i':
-        case 'j':
-        case 'k':
-        case 'l':
-        case 'm':
-        case 'n':
-        case 'o':
-        case 'p':
-        case 'q':
-        case 'r':
-        case 's':
-        case 't':
-        case 'u':
-        case 'v':
-        case 'w':
-        case 'x':
-        case 'y':
-        case 'z':
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'H':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'L':
-        case 'M':
-        case 'N':
-        case 'O':
-        case 'P':
-        case 'Q':
-        case 'R':
-        case 'S':
-        case 'T':
-        case 'U':
-        case 'V':
-        case 'W':
-        case 'X':
-        case 'Y':
-        case 'Z':
-          if (!stats && !gameOver) {
-            pressedKey(k);
-          }
-          break;
+      return false;
+  }
+}
+
+
+function pressedKey(key) {
+  if (!stats && !gameOver) {
+    if (gameState.games[todayIndex].guess.length < wordLength) {
+      gameState.games[todayIndex].guess += key.toUpperCase();
+      //TODO: letter-appended-to-guess animation
+      saveState();
+    }
+    refreshSquares = true;
+  }
+}
+
+
+/**
+ * 
+ * @param {string} k The typed key
+ */
+function keyTyped(k) {
+  if (isLetter(key)) {
+    if (!stats && !gameOver) {
+      pressedKey(key);
+    }
+  }
+  else {
+    if (isLetter(k)) {
+      if (!stats && !gameOver) {
+        pressedKey(k);
       }
-      break;
+    }
   }
 }
 
@@ -842,9 +902,15 @@ function toggleDarkMode() {
       }
     }
   }
-  darkModeButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white));
-  contrastButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white));
-  statsButton.style('color', (gameState.mode ? palette.white : palette.black)).style('background-color', (gameState.mode ? palette.black : palette.white));
+  darkModeButton
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white));
+  contrastButton
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white));
+  statsButton
+    .style('color', (gameState.mode ? palette.white : palette.black))
+    .style('background-color', (gameState.mode ? palette.black : palette.white));
   darkModeButton.elt.innerText = (gameState.mode ? "\u263C" : "\u263E");
   statsButton.elt.src = "assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico";
 }
@@ -981,7 +1047,7 @@ function copyStats() { //expects gamesWon !== 0
   mean.toFixed(2);
   guessCountsSorted.sort(function (a, b) { return a - b; });
   guessCountsSorted.concat(new Array(gamesPlayed - gamesWon).fill("X"));
-  let median = (gamesPlayed ? "X" : undefined);
+  let median = (gamesPlayed ? "X" : null);
   if (guessCountsSorted.length) {
     if (guessCountsSorted.length % 2 === 0) {
       const leftMiddle = guessCountsSorted[guessCountsSorted.length / 2 - 1];

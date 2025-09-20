@@ -10,7 +10,7 @@
     - [Folder structure](#folder-structure)
     - [Programming language(s)](#programming-languages)
   - [Usage](#usage)
-    - [Invokation](#invokation)
+    - [Invocation](#invocation)
     - [Operation](#operation)
   - [Contributions](#contributions)
 
@@ -40,7 +40,7 @@ The black is the provided display area.
 
 ## Usage
 
-### Invokation
+### Invocation
 
 Visit <https://anderjef.github.io/Wordle-Rx/>.
 
