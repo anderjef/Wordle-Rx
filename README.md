@@ -1,57 +1,49 @@
 # Wordle Rx
 
-## Table of Contents
-
-- [Wordle Rx](#wordle-rx)
-  - [Table of Contents](#table-of-contents)
-  - [Description](#description)
-    - [Display](#display)
-      - [GUI](#gui)
-    - [Folder structure](#folder-structure)
-    - [Programming language(s)](#programming-languages)
-  - [Usage](#usage)
-    - [Invocation](#invocation)
-    - [Operation](#operation)
-  - [Contributions](#contributions)
-
-## Description
-
-This program allows for playing the popular [Wordle](https://www.nytimes.com/games/wordle/index.html) game where the answers (repeated weekly) are seven common medical/nursing terms for National Nurses Week and seven common medical/pharmacy terms for National Pharmacy Week!  
+Wordle Rx allows playing a Wordle-style game, but where the answers (repeated weekly) are seven common medical/nursing terms repeated for National Nurses Week and seven common medical/pharmacy terms for National Pharmacy Week.  
 Start date: 2022-08-23  
 
-### Display
+## Demo
 
-#### GUI
-
-![The main game display responding to a sequence of varied window dimensions](Picture1.gif)
+![The main display GUI responding to a sequence of varied viewport dimensions](Picture1.gif)
 
 The black is the provided display area.
 
-### Folder structure
+## Dependencies
 
-| Tree with Root Having Local Path | Generation Method | Description |
-| -------------------------------- | ----------------- | ----------- |
-| <https://github.com/anderjef/Wordle-Rx> | Processing | <!-- --> |
+- The editor of your choice, such as [p5.js Web Editor](https://editor.p5js.org/);
 
-### Programming language(s)
+## Installation
 
-- JavaScript
-  - [sketch.js](sketch.js)&mdash;main program entrance containing all pertinent code
+Open the repository with the editor of your choice, or skip installation altogether by visiting [the deployed version](https://anderjef.github.io/Wordle-Rx/).
+
+### Configuration
+
+- Set National Nurses Week answers in [answers1.txt](answers1.txt).
+- Set National Pharmacy Week answers in [answers2.txt](answers2.txt).
+- Set acceptable guesses in [valid words.txt](valid%20words.txt). Be sure to include answers so that players know that such words are valid guesses.
 
 ## Usage
 
-### Invocation
+1. You can visit the production build at <https://anderjef.github.io/Wordle-Rx/> or, if you have gone through the [installation](#installation), render [index.html](./index.html).
+1. Type letters or use the provided on-screen keyboard to append to the current guess. Use backspace to correct errors, and press enter/return to submit a guess, looking to match the answer. Hints are provided for submitted guesses where green indicates a letter found in the correct postiion, while yellow indicates a letter in the answer but in a different position.
+1. Share your game by copying it to your device's clipboard.
 
-Visit <https://anderjef.github.io/Wordle-Rx/>.
+## Deployment
 
-### Operation
+<https://anderjef.github.io/Wordle-Rx/> is continuously deployed to via a GitHub Action workflow.
 
-Type letters or use the provided on-screen keyboard to append to the current guess, use backspace to correct errors, and press enter or return to submit a guess, looking to match the answer. Hints are provided for submitted guesses where green indicates a letter found in the correct location as the answer while yellow indicates a matching letter in the solution that is found at a different position in the word. Share your game by copying it to your device's clipboard.
+## Acknowledgements
 
-## Contributions
+- Inspired by [Wordle from *The New York Times*](https://www.nytimes.com/games/wordle/index.html).
+- Inspired by [Quordle](https://www.quordle.com/).
+- [valid words.txt](valid%20words.txt) from <https://raw.githubusercontent.com/tabatkins/wordle-list/main/words>
+- Generating a hash from a string inspired by <https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/>.
 
-- Jeffrey Andersen&mdash;developer
-- <https://www.nytimes.com/games/wordle/index.html>&mdash;inspiration
-- <https://www.quordle.com/>&mdash;inspiration
-- <https://raw.githubusercontent.com/tabatkins/wordle-list/main/words>&mdash;[valid words.txt](./valid%20words.txt)
-- <https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/>&mdash;generating a hash from a string
+## Author
+
+- **Jeffrey Andersen** &mdash; [GitHub Profile](https://github.com/anderjef) &bull; [Website](https://anderjef.github.io)
+
+## License
+
+For copyright, license, and warranty, see [LICENSE.md](LICENSE.md).
