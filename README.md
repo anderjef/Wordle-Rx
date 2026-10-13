@@ -11,7 +11,7 @@ The black is the provided display area.
 
 ## Dependencies
 
-- The editor of your choice, such as [p5.js Web Editor](https://editor.p5js.org/);
+- The editor of your choice, such as [p5.js Web Editor](https://editor.p5js.org/).
 
 ## Installation
 
