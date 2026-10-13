@@ -868,18 +868,18 @@ function pressedKey(key) {
 
 /**
  * 
- * @param {string} k The typed key
+ * @param {string|KeyboardEvent} k The typed key or key event
  */
 function keyTyped(k) {
-  if (isLetter(key)) {
+  if (isLetter(k)) {
     if (!stats && !gameOver) {
-      pressedKey(key);
+      pressedKey(k);
     }
   }
   else {
-    if (isLetter(k)) {
+    if (isLetter(key)) {
       if (!stats && !gameOver) {
-        pressedKey(k);
+        pressedKey(key);
       }
     }
   }
