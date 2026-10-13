@@ -112,9 +112,9 @@ let backspaceButton;
 
 
 function preload() {
-  validWords = loadStrings("valid words.txt"); //all words must be exactly wordLength long
-  answers1 = loadStrings("answers1.txt");
-  answers2 = loadStrings("answers2.txt");
+  validWords = loadStrings("valid-words.txt");
+  answers1 = loadStrings("national-nurses-week-answers.txt");
+  answers2 = loadStrings("national-pharmacy-week-answers.txt");
 }
 
 
@@ -133,6 +133,9 @@ function setup() {
   fillCanvasToSpace(letterButtonHeight);
   const now = new Date();
   todayIndex = ((new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0))) % 7;
+  validWords = validWords.filter(line => line.length === wordLength);
+  answers1 = answers1.filter(line => line.length === wordLength);
+  answers2 = answers2.filter(line => line.length === wordLength);
   validWords += answers1;
   validWords += answers2;
   answers = (0 < now.getMonth() && now.getMonth() < 7 ? answers2 : answers1);

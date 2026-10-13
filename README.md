@@ -19,8 +19,8 @@ Open the repository with the editor of your choice, or skip installation altoget
 
 ### Configuration
 
-- Set National Nurses Week answers in [answers1.txt](answers1.txt).
-- Set National Pharmacy Week answers in [answers2.txt](answers2.txt).
+- Set National Nurses Week answers in [national-nurses-week-answers.txt](national-nurses-week-answers.txt).
+- Set National Pharmacy Week answers in [national-pharmacy-week-answers.txt](national-pharmacy-week-answers.txt).
 - Set acceptable guesses in [valid words.txt](valid%20words.txt). Be sure to include answers so that players know that such words are valid guesses.
 
 ## Usage
