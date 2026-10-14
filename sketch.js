@@ -992,7 +992,10 @@ async function setClipboard(text, alertText = "") {
         window.alert(alertText);
       }
     }, () => new Promise((resolve) => setTimeout(resolve, 200)))
-    .catch(e => console.error(e.message));
+    .catch(e => {
+      console.error(e.message);
+      window.alert(`Oops! Failed to copy to clipboard (${e.message}):\n${text}`);
+    });
 }
 
 
@@ -1022,7 +1025,7 @@ function copyDaily() {
   for (const c of colorsForCopying) {
     colorsJoined += c.join("") + "\r\n";
   }
-  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard!");
+  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard");
 }
 
 
