@@ -90,7 +90,7 @@ console.assert(victoryPopups.length === maxGuesses);
 let colors;
 const colorsForCopying = [];
 const popups = [];
-let keyboardColors; //in the order of the Qwerty keyboard read left to right then top to bottom
+let keyboardColors; //in the order of the QWERTY keyboard read left to right then top to bottom
 let todayIndex;
 let gameOver = false;
 let justEndedGameLoopCount = 0;
