@@ -1047,7 +1047,7 @@ function copyStats() { //expects gamesWon !== 0
     }
   }
   mean /= gamesWon;
-  mean.toFixed(2);
+  mean = mean.toFixed(2);
   guessCountsSorted.sort(function (a, b) { return a - b; });
   guessCountsSorted.concat(new Array(gamesPlayed - gamesWon).fill("X"));
   let median = (gamesPlayed ? "X" : null);
