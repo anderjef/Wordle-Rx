@@ -1,6 +1,6 @@
 # Wordle Rx
 
-Wordle Rx allows playing a Wordle-style game, but where the answers (repeated weekly) are seven common medical/nursing terms repeated for National Nurses Week and seven common medical/pharmacy terms for National Pharmacy Week.  
+Wordle Rx allows playing a Wordle-style game, but where the answers, repeated weekly, are seven nursing terms for National Nurses Week and seven pharmacy terms for National Pharmacy Week.  
 Start date: 2022-08-23  
 
 ## Demo
