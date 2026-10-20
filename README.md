@@ -5,7 +5,7 @@ Start date: 2022-08-23
 
 ## Demo
 
-![The main display GUI responding to a sequence of varied viewport dimensions](Picture1.gif)
+![The main display GUI responding to a sequence of varied viewport dimensions](the-main-display-gui-responding-to-a-sequence-of-varied-viewport-dimensions.gif)
 
 The black is the provided display area.
 
