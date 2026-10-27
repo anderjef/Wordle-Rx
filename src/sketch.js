@@ -86,6 +86,7 @@ let displayOffset = 0;
 const palette = {};
 const victoryPopups = ["Ace", "Eagle", "Birdie", "Par", "Bogey", "Double Bogey", "Close One"];
 console.assert(victoryPopups.length === maxGuesses);
+const lineEnding = navigator.userAgent.indexOf("Windows") !== -1 ? "\r\n" : "\n";
 
 let colors;
 const colorsForCopying = [];
@@ -1041,9 +1042,9 @@ function copyDaily() {
   }
   let colorsJoined = "";
   for (const c of colorsForCopying) {
-    colorsJoined += c.join("") + "\r\n";
+    colorsJoined += c.join("") + lineEnding;
   }
-  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X"}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard");
+  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X"}/${maxGuesses}${lineEnding}anderjef.github.io/Wordle-Rx${lineEnding}${colorsJoined}`, "Results copied to clipboard");
 }
 
 
@@ -1109,7 +1110,7 @@ function copyStats() { //expects gamesWon !== 0
       mode.push("X"); //append the count of the loss condition (if necessary)
     }
   }
-  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${mean ? mean : "N/A"}\r\nMedian (completed): ${median ? median : "N/A"}\r\nMode (completed): ${mode.length ? mode : "N/A"}\r\nScores: ${scores}`, "Stats copied to clipboard!");
+  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}${lineEnding}anderjef.github.io/Wordle-Rx${lineEnding}ID: ${gameState.ID}${lineEnding}Hash: ${hashCode(gameState.ID + lineEnding + scores)}${lineEnding}Max streak: ${maxStreak}${lineEnding}Mean (successful): ${mean ? mean : "N/A"}${lineEnding}Median (completed): ${median ? median : "N/A"}${lineEnding}Mode (completed): ${mode.length ? mode : "N/A"}${lineEnding}Scores: ${scores}`, "Stats copied to clipboard!");
 }
 
 
