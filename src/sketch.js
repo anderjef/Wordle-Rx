@@ -167,18 +167,20 @@ function setup() {
       gameState.contrast = false;
     }
     colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => (gameState.mode ? palette.black : palette.white))));
-    if (gameState.games[todayIndex].guess || gameState.games[todayIndex].previousGuesses.length) {
-      for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
-        updateColorsForClipboardAndGUI(gameState.games[todayIndex].previousGuesses[i], i);
+    const gameToday = gameState.games[todayIndex];
+    if (gameToday.guess || gameToday.previousGuesses.length) {
+      for (let i = 0; i < gameToday.previousGuesses.length; i++) {
+        updateColorsForClipboardAndGUI(gameToday.previousGuesses[i], i);
       }
     }
     for (let i = 0; i < gameState.games.length; i++) {
-      const hasDateCompleted = gameState.games[i].dateCompleted !== undefined;
-      if (hasDateCompleted && gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.length < maxGuesses && gameState.games[i].previousGuesses.slice(-1)[0] !== answers[i]) { //backwards compatibility of giving extra guesses for completed games when maxGuesses is increased
-        gameState.games[i].dateCompleted = undefined;
+      const game = gameState.games[i];
+      const hasDateCompleted = game.dateCompleted !== undefined;
+      if (hasDateCompleted && game.previousGuesses.length && game.previousGuesses.length < maxGuesses && game.previousGuesses.slice(-1)[0] !== answers[i]) { //backwards compatibility of giving extra guesses for completed games when maxGuesses is increased
+        game.dateCompleted = undefined;
       }
       gamesPlayed += hasDateCompleted;
-      gamesWon += (hasDateCompleted && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]);
+      gamesWon += (hasDateCompleted && game.previousGuesses.slice(-1)[0] === answers[i]);
     }
     let gamesSortedByCompletion = structuredClone(gameState.games);
     for (let i = 0; i < gamesSortedByCompletion.length; i++) {
@@ -186,7 +188,7 @@ function setup() {
     }
     gamesSortedByCompletion.sort(function (a, b) {
       if (a.dateCompleted !== undefined && b.dateCompleted !== undefined) {
-        return (new Date(a.dateCompleted)) - (new Date(b.dateCompleted));
+        return new Date(a.dateCompleted) - new Date(b.dateCompleted);
       }
       else if (a.dateCompleted !== undefined) {
         return -1;
@@ -199,7 +201,8 @@ function setup() {
       }
     });
     for (let i = 0; i < gamesSortedByCompletion.length && gamesSortedByCompletion[i].dateCompleted !== undefined; i++) { //all the games with undefined completion dates were moved to the end
-      if (gamesSortedByCompletion[i].previousGuesses.slice(-1)[0] === answers[gamesSortedByCompletion[i].gameIndex]) { //previousGuesses will have some length because the game was already confirmed to be completed
+      const game = gamesSortedByCompletion[i];
+      if (game.previousGuesses.slice(-1)[0] === answers[game.gameIndex]) { //previousGuesses will have some length because the game was already confirmed to be completed
         currentStreak++;
       }
       else {
@@ -219,39 +222,42 @@ function setup() {
   }
   const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
   const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
+  const borderRadius = (2 * screenDivision) + 'px';
+  const textColor = gameState.mode ? palette.white : palette.black;
+  const backgroundColor = gameState.mode ? palette.black : palette.white;
   darkModeButton = createButton(gameState.mode ? "\u263C" : "\u263E")
     .mousePressed(toggleDarkMode)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
-    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('border-radius', borderRadius)
     .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white)
+    .style('color', textColor)
+    .style('background-color', backgroundColor)
     .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
     .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
   contrastButton = createButton(gameState.contrast ? "\u25D0" : "\u25D1")
     .mousePressed(toggleContrast)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
-    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('border-radius', borderRadius)
     .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white)
+    .style('color', textColor)
+    .style('background-color', backgroundColor)
     .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
     .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
   statsButton = createImg("assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico", stats ? "Return to game" : "See statistics")
     .mousePressed(toggleStats)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
-    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('border-radius', borderRadius)
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white)
+    .style('color', textColor)
+    .style('background-color', backgroundColor)
     .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
     .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
   clipboardButton = createButton("Copy to clipboard")
@@ -261,7 +267,7 @@ function setup() {
     .style('color', palette.white)
     .style('background-color', palette.darkBlue)
     .style('display', stats && gameOver ? '' : 'none')
-    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('border-radius', borderRadius)
     .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
     .style('touch-action', 'manipulation')
     .size(18 * screenDivision, 10 * screenDivision)
@@ -273,7 +279,7 @@ function setup() {
     .style('color', palette.white)
     .style('background-color', palette.darkBlue)
     .style('display', stats && gameOver ? '' : 'none')
-    .style('border-radius', (2 * screenDivision) + 'px')
+    .style('border-radius', borderRadius)
     .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
     .style('touch-action', 'manipulation')
     .size(18 * screenDivision, 10 * screenDivision)
@@ -465,8 +471,9 @@ function draw() {
       let mode = 0;
       let guessDistribution = Array.from({ length: maxGuesses }, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
       for (let i = 0; i < answers.length; i++) {
-        if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
-          guessDistribution[gameState.games[i].previousGuesses.length - 1] += (gameState.games[i].dateCompleted !== undefined);
+        const game = gameState.games[i];
+        if (game.previousGuesses.length && game.previousGuesses.slice(-1)[0] === answers[i]) {
+          guessDistribution[game.previousGuesses.length - 1] += (game.dateCompleted !== undefined);
         }
       }
       for (let i = 0; i < maxGuesses; i++) {
@@ -539,8 +546,9 @@ function draw() {
  * @param {int} letterButtonHeight The height of letter buttons
  */
 function fillCanvasToSpace(letterButtonHeight) {
-  if (height < windowHeight - letterButtonHeight * 3) {
-    resizeCanvas(width, windowHeight - letterButtonHeight * 3);
+  const maxCanvasHeight = windowHeight - letterButtonHeight * 3;
+  if (height < maxCanvasHeight) {
+    resizeCanvas(width, maxCanvasHeight);
   }
 }
 
@@ -602,25 +610,28 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
  */
 function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, letterSpaceMultiplier, scaleChanged) {
   if (scaleChanged) {
+    const textColor = gameState.mode ? palette.white : palette.black;
+    const backgroundColor = gameState.mode ? palette.black : palette.white;
     const maxScreenDivision = max(screenDivision, screenDivisionByHeight);
+    const borderRadius = (2 * screenDivision) + 'px';
     darkModeButton
-      .style('color', gameState.mode ? palette.white : palette.black)
-      .style('background-color', gameState.mode ? palette.black : palette.white)
-      .style('border-radius', (2 * screenDivision) + 'px')
+      .style('color', textColor)
+      .style('background-color', backgroundColor)
+      .style('border-radius', borderRadius)
       .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
       .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
       .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
     contrastButton
-      .style('color', gameState.mode ? palette.white : palette.black)
-      .style('background-color', gameState.mode ? palette.black : palette.white)
-      .style('border-radius', (2 * screenDivision) + 'px')
+      .style('color', textColor)
+      .style('background-color', backgroundColor)
+      .style('border-radius', borderRadius)
       .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
       .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
       .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
     statsButton
-      .style('color', gameState.mode ? palette.white : palette.black)
-      .style('background-color', gameState.mode ? palette.black : palette.white)
-      .style('border-radius', (2 * screenDivision) + 'px')
+      .style('color', textColor)
+      .style('background-color', backgroundColor)
+      .style('border-radius', borderRadius)
       .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
       .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
     clipboardButton
@@ -725,18 +736,19 @@ function completedDaily(won) {
 
 
 function submitGuess() {
-  if (gameState.games[todayIndex].guess.length === wordLength) {
-    if (validWords.includes(gameState.games[todayIndex].guess)) {
-      const guessMatchesAnswer = (gameState.games[todayIndex].guess === answers[todayIndex]);
-      updateColorsForClipboardAndGUI(gameState.games[todayIndex].guess, gameState.games[todayIndex].previousGuesses.length, guessMatchesAnswer);
-      gameState.games[todayIndex].previousGuesses.push(gameState.games[todayIndex].guess);
-      gameState.games[todayIndex].guess = "";
+  const gameToday = gameState.games[todayIndex];
+  if (gameToday.guess.length === wordLength) {
+    if (validWords.includes(gameToday.guess)) {
+      const guessMatchesAnswer = (gameToday.guess === answers[todayIndex]);
+      updateColorsForClipboardAndGUI(gameToday.guess, gameToday.previousGuesses.length, guessMatchesAnswer);
+      gameToday.previousGuesses.push(gameToday.guess);
+      gameToday.guess = "";
       //TODO: word-submitted animation
       if (guessMatchesAnswer) { //won
         completedDaily(true);
-        popups.push({ [victoryPopups[gameState.games[todayIndex].previousGuesses.length - 1]]: Date.now() });
+        popups.push({ [victoryPopups[gameToday.previousGuesses.length - 1]]: Date.now() });
       }
-      else if (gameState.games[todayIndex].previousGuesses.length === maxGuesses) { //lost
+      else if (gameToday.previousGuesses.length === maxGuesses) { //lost
         completedDaily(false);
         popups.push({ [answers[todayIndex]]: Date.now() });
       }
@@ -755,7 +767,8 @@ function submitGuess() {
 
 
 function removeLetterFromGuess() {
-  gameState.games[todayIndex].guess = gameState.games[todayIndex].guess.slice(0, gameState.games[todayIndex].guess.length - 1);
+  const gameToday = gameState.games[todayIndex];
+  gameToday.guess = gameToday.guess.slice(0, gameToday.guess.length - 1);
   saveState();
   refreshSquares = true;
 }
@@ -763,8 +776,11 @@ function removeLetterFromGuess() {
 
 function saveState() {
   storeItem('wordle-rx-state', gameState);
-  if (!gamesPlayed && !gameState.games[todayIndex].previousGuesses.length && !gameState.games[todayIndex].guess.length && getItem('wordle-rx-state') !== null) {
-    clearRelevantLocalStorage(false);
+  if (!gamesPlayed) {
+    const gameToday = gameState.games[todayIndex];
+    if (!gameToday.previousGuesses.length && !gameToday.guess.length && getItem('wordle-rx-state') !== null) {
+      clearRelevantLocalStorage(false);
+    }
   }
 }
 
@@ -895,25 +911,27 @@ function toggleDarkMode() {
   else {
     refreshSquares = true;
   }
+  const textColor = gameState.mode ? palette.white : palette.black;
+  const backgroundColor = gameState.mode ? palette.black : palette.white;
   for (let i = 0; i < colors.length; i++) {
     for (let j = 0; j < colors[i].length; j++) {
       if (colors[i][j].toString() === (gameState.mode ? color(192) : color(63)).toString()) {
         colors[i][j] = gameState.mode ? color(63) : color(192);
       }
-      else if (colors[i][j].toString() === (gameState.mode ? palette.white : palette.black).toString()) {
-        colors[i][j] = gameState.mode ? palette.black : palette.white;
+      else if (colors[i][j].toString() === textColor.toString()) {
+        colors[i][j] = backgroundColor;
       }
     }
   }
   darkModeButton
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white);
+    .style('color', textColor)
+    .style('background-color', backgroundColor);
   contrastButton
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white);
+    .style('color', textColor)
+    .style('background-color', backgroundColor);
   statsButton
-    .style('color', gameState.mode ? palette.white : palette.black)
-    .style('background-color', gameState.mode ? palette.black : palette.white);
+    .style('color', textColor)
+    .style('background-color', backgroundColor);
   darkModeButton.elt.innerText = gameState.mode ? "\u263C" : "\u263E";
   statsButton.elt.src = "assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico";
 }
@@ -1036,14 +1054,15 @@ function copyStats() { //expects gamesWon !== 0
   let modeTempArray = Array.from({ length: gameState.games.length }, () => (0)); //could use a different array construction method due to not filling with an object and hence not needing to ensure objects are distinct, but went with this method for stylistic consistency
   const scores = []; //"x" for unattempted, "X" for failed attempt, one more than how many guesses were taken with "+" appended for started but incomplete games, or how many guesses it took
   for (let i = 0; i < gameState.games.length; i++) {
-    if (gameState.games[i].previousGuesses.length && gameState.games[i].previousGuesses.slice(-1)[0] === answers[i]) {
-      mean += gameState.games[i].previousGuesses.length;
-      scores.push(gameState.games[i].previousGuesses.length);
-      guessCountsSorted.push(gameState.games[i].previousGuesses.length);
-      modeTempArray[gameState.games[i].previousGuesses.length - 1]++;
+    const previousGuesses = gameState.games[i].previousGuesses;
+    if (previousGuesses.length && previousGuesses.slice(-1)[0] === answers[i]) {
+      mean += previousGuesses.length;
+      scores.push(previousGuesses.length);
+      guessCountsSorted.push(previousGuesses.length);
+      modeTempArray[previousGuesses.length - 1]++;
     }
-    else if (gameState.games[i].previousGuesses.length) {
-      scores.push(gameState.games[i].previousGuesses.length === maxGuesses ? "X" : gameState.games[i].previousGuesses.length + "+");
+    else if (previousGuesses.length) {
+      scores.push(previousGuesses.length === maxGuesses ? "X" : previousGuesses.length + "+");
     }
     else {
       scores.push("x");
