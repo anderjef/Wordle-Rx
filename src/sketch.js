@@ -163,7 +163,7 @@ function setup() {
     if (gameState.mode === undefined) { //for backwards compatibility with no dark/light mode distinction
       gameState.mode = true;
     }
-    if (gameState.contrast === undefined) { //for backwards compatibility with no (high/low) contrast mode distinction
+    if (gameState.contrast === undefined) { //for backwards compatibility with no contrast mode distinction
       gameState.contrast = false;
     }
     colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
@@ -198,7 +198,7 @@ function setup() {
         return 0;
       }
     });
-    for (let i = 0; i < gamesSortedByCompletion.length && gamesSortedByCompletion[i].dateCompleted !== undefined; i++) { //all the games with undefined completion dates were sorted to the end
+    for (let i = 0; i < gamesSortedByCompletion.length && gamesSortedByCompletion[i].dateCompleted !== undefined; i++) { //all the games with undefined completion dates were moved to the end
       if (gamesSortedByCompletion[i].previousGuesses.slice(-1)[0] === answers[gamesSortedByCompletion[i].gameIndex]) { //previousGuesses will have some length because the game was already confirmed to be completed
         currentStreak++;
       }
@@ -207,10 +207,10 @@ function setup() {
         maxStreak = max(maxStreak, currentStreak);
       }
     }
-    maxStreak = max(maxStreak, currentStreak); //if the existing streak is the largest streak
+    maxStreak = max(maxStreak, currentStreak); //if the current streak is the longest
     if (gamesPlayed === answers.length) {
       determineResetPoint();
-      if (resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
+      if (resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equates to false any way it is compared to zero
         resetPoint = undefined;
         clearRelevantLocalStorage();
         resetLocalStorage();
@@ -528,7 +528,7 @@ function draw() {
   }
   const now = new Date();
   todayIndex = ((new Date(now)).getDay() + (7 - (0 < now.getMonth() && now.getMonth() < 7 ? (new Date(now.getFullYear(), 4, 6)).getDay() : 0))) % 7; //updated at the end of the loop for being initialized before first iteration of the draw loop/function
-  if (gamesPlayed === answers.length && resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equivalates to false any way it is compared to zero
+  if (gamesPlayed === answers.length && resetPoint - (new Date(now)).getTime() < 0) { //if resetPoint is undefined, the subtraction becomes NaN which equates to false any way it is compared to zero
     resetPoint = undefined;
     resetLocalStorage();
   }
@@ -536,7 +536,7 @@ function draw() {
 
 /**
  * 
- * @param {int} letterButtonHeight The height of the letter buttons
+ * @param {int} letterButtonHeight The height of letter buttons
  */
 function fillCanvasToSpace(letterButtonHeight) {
   if (height < windowHeight - letterButtonHeight * 3) {
@@ -561,7 +561,7 @@ function clearRelevantLocalStorage(alert = true) {
 function resetLocalStorage() {
   gameState = {
     ID: Math.floor(Math.random() * 10 ** 12), //ID is one in a trillion
-    games: [], //at the index indicating the day, contains a map of the final state of the unsubmitted guess and the previous guesses as well as the date the game was completed (if it was completed)
+    games: [], //at the index indicating the day, contains a map of the final state of the unsubmitted guess and the previous guesses as well as the date the game was completed (if completed)
     mode: true, //whether to use dark mode
     contrast: false, //whether to use high contrast
   };
