@@ -157,7 +157,7 @@ function setup() {
       clearRelevantLocalStorage();
     }
     resetLocalStorage();
-    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
+    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => (gameState.mode ? palette.black : palette.white))));
   }
   else {
     if (gameState.mode === undefined) { //for backwards compatibility with no dark/light mode distinction
@@ -166,7 +166,7 @@ function setup() {
     if (gameState.contrast === undefined) { //for backwards compatibility with no contrast mode distinction
       gameState.contrast = false;
     }
-    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => ((gameState.mode ? palette.black : palette.white)))));
+    colors = Array.from({ length: maxGuesses }, () => (Array.from({ length: wordLength }, () => (gameState.mode ? palette.black : palette.white))));
     if (gameState.games[todayIndex].guess || gameState.games[todayIndex].previousGuesses.length) {
       for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
         updateColorsForClipboardAndGUI(gameState.games[todayIndex].previousGuesses[i], i);
@@ -219,7 +219,7 @@ function setup() {
   }
   const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
   const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
-  darkModeButton = createButton((gameState.mode ? "\u263C" : "\u263E"))
+  darkModeButton = createButton(gameState.mode ? "\u263C" : "\u263E")
     .mousePressed(toggleDarkMode)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
@@ -227,11 +227,11 @@ function setup() {
     .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white)
     .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
     .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-  contrastButton = createButton((gameState.contrast ? "\u25D0" : "\u25D1"))
+  contrastButton = createButton(gameState.contrast ? "\u25D0" : "\u25D1")
     .mousePressed(toggleContrast)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
@@ -239,19 +239,19 @@ function setup() {
     .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white)
     .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
     .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
-  statsButton = createImg("assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico", (stats ? "Return to game" : "See statistics"))
+  statsButton = createImg("assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico", stats ? "Return to game" : "See statistics")
     .mousePressed(toggleStats)
     .mouseOver(blackButtonMouseOver)
     .mouseOut(blackButtonMouseOut)
     .style('border-radius', (2 * screenDivision) + 'px')
     .style('touch-action', 'manipulation')
     .style('border', 'none')
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white))
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white)
     .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
     .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
   clipboardButton = createButton("Copy to clipboard")
@@ -260,7 +260,7 @@ function setup() {
     .mouseOut(blueButtonMouseOut)
     .style('color', palette.white)
     .style('background-color', palette.darkBlue)
-    .style('display', (stats && gameOver ? '' : 'none'))
+    .style('display', stats && gameOver ? '' : 'none')
     .style('border-radius', (2 * screenDivision) + 'px')
     .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
     .style('touch-action', 'manipulation')
@@ -272,7 +272,7 @@ function setup() {
     .mouseOut(blueButtonMouseOut)
     .style('color', palette.white)
     .style('background-color', palette.darkBlue)
-    .style('display', (stats && gameOver ? '' : 'none'))
+    .style('display', stats && gameOver ? '' : 'none')
     .style('border-radius', (2 * screenDivision) + 'px')
     .style('font-size', (3 / 4 * (10 * screenDivision) / 4) + 'pt')
     .style('touch-action', 'manipulation')
@@ -344,14 +344,14 @@ function draw() {
   const screenDivision = width / numScreenDivisions;
   maxFrameRate = floor(max(maxFrameRate, frameRate())); //must be set before call to frameRate(1.25) in case game is loaded to a completed game state to avoid a perpetually low frame rate
   if (refreshSquares || refreshStats) {
-    background((gameState.mode ? 0 : 255));
+    background(gameState.mode ? 0 : 255);
   }
   const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
   const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
   textSize(gameLetterSize * screenDivision);
   if (refreshSquares || refreshStats || newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
-    stroke((gameState.mode ? 255 : 0));
-    fill((gameState.mode ? 255 : 0));
+    stroke(gameState.mode ? 255 : 0);
+    fill(gameState.mode ? 255 : 0);
     text("Wordle Rx", width / 2, gameLetterSize * screenDivision);
   }
   if (!stats) {
@@ -371,8 +371,8 @@ function draw() {
         }
       }
       strokeWeight(1);
-      stroke((gameState.mode ? 255 : 0));
-      fill((gameState.mode ? 255 : 0));
+      stroke(gameState.mode ? 255 : 0);
+      fill(gameState.mode ? 255 : 0);
       for (let i = 0; i < gameState.games[todayIndex].previousGuesses.length; i++) {
         const y = (1.6 * gameLetterSize + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
         for (let j = 0; j < wordLength; j++) {
@@ -381,8 +381,8 @@ function draw() {
         }
       }
     }
-    stroke((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : (gameState.mode ? 255 : 0)));
-    fill((gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : (gameState.mode ? 255 : 0)));
+    stroke(gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : (gameState.mode ? 255 : 0));
+    fill(gameState.games[todayIndex].guess.length === wordLength && !validWords.includes(gameState.games[todayIndex].guess) ? palette.red : (gameState.mode ? 255 : 0));
     for (let i = 0; i < gameState.games[todayIndex].guess.length; i++) {
       const x = ((numScreenDivisions - (wordLength * (letterSpaceMultiplier + 1) - 1)) / 2 + letterSpaceMultiplier / 2 + i * (letterSpaceMultiplier + 1)) * screenDivision;
       const y = (1.6 * gameLetterSize + letterSpaceMultiplier / 2 + gameState.games[todayIndex].previousGuesses.length * (letterSpaceMultiplier + 1)) * screenDivision;
@@ -395,11 +395,11 @@ function draw() {
         numPopupsToDiscard = i + 1;
       }
       else {
-        stroke((gameState.mode ? 255 : 0));
-        fill((gameState.mode ? 255 : 0));
+        stroke(gameState.mode ? 255 : 0);
+        fill(gameState.mode ? 255 : 0);
         rect(width / 2 - 7 * screenDivision, (gameLetterSize + (i - numPopupsToDiscard + 1) * 6) * screenDivision, 14 * screenDivision, 4 * screenDivision, screenDivision / 2);
-        stroke((gameState.mode ? 0 : 255));
-        fill((gameState.mode ? 0 : 255));
+        stroke(gameState.mode ? 0 : 255);
+        fill(gameState.mode ? 0 : 255);
         textSize(1.65 * screenDivision);
         text(label, width / 2, (gameLetterSize + 2 + (i - numPopupsToDiscard + 1) * 6) * screenDivision);
       }
@@ -410,7 +410,7 @@ function draw() {
     }
     if (newWindowWidth !== lastWindowWidth || newWindowHeight !== lastWindowHeight) {
       const letterButtonHeight = min(width / 6, (newWindowHeight - height) / 3);
-      const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : min(newWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4)));
+      const letterButtonWidth = max(width / keyboardRowIndexToNumLetterKeys[0], canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : min(newWindowWidth / keyboardRowIndexToNumLetterKeys[0], letterButtonHeight * 3 / 4));
       const keyboardFontSize = min((3 / 8 * gameLetterSize * screenDivision), 0.4 * letterButtonWidth) + 'pt'; //capping font size at 0.4 * letterButtonWidth is to keep the Enter key's text from overflowing its button width
       for (let i = 0; i < keyboard.length; i++) {
         for (let j = 0; j < keyboard[i].length; j++) {
@@ -433,7 +433,7 @@ function draw() {
         .position(displayOffset + (canvasWindowWidthMultiplier * newWindowWidth <= width ? 0 : (width - keyboardRowIndexToNumLetterKeys[0] * letterButtonWidth) / 2) + 8.5 * letterButtonWidth, newWindowHeight - min(letterButtonHeight, (newWindowHeight - height) / 3));
     }
     for (let i = 0; i < keyboard.length; i++) {
-      const indexOffset = (i > 0 ? keyboard[0].length + (i > 1 ? keyboard[1].length : 0) : 0);
+      const indexOffset = i > 0 ? keyboard[0].length + (i > 1 ? keyboard[1].length : 0) : 0;
       for (let j = 0; j < keyboard[i].length; j++) {
         keyboard[i][j].style('background-color', keyboardColors[j + indexOffset]);
       }
@@ -442,7 +442,7 @@ function draw() {
   else {
     const screenDivisionByHeight = height / numScreenDivisions;
     if (refreshStats) {
-      stroke((gameState.mode ? 0 : 255));
+      stroke(gameState.mode ? 0 : 255);
       const letterSpaceMultiplier = min(numScreenDivisions / wordLength - 1, (7 / 8 * height / screenDivision) / maxGuesses - 1);
       const gameLetterSize = 0.7 * (letterSpaceMultiplier - 1);
       textSize(3 * screenDivisionByHeight);
@@ -474,9 +474,9 @@ function draw() {
         mode = max(mode, guessDistribution[i]);
       }
       for (let i = 0; i < maxGuesses; i++) {
-        fill((i + 1 === gameState.games[todayIndex].previousGuesses.length ? (gameState.contrast ? palette.orange : palette.green) : (gameState.mode ? 63 : 192)));
+        fill(i + 1 === gameState.games[todayIndex].previousGuesses.length ? (gameState.contrast ? palette.orange : palette.green) : (gameState.mode ? 63 : 192));
         rect(((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 - 1 + i * 5) * screenDivision, (gameLetterSize + 40) * screenDivisionByHeight, 2 * screenDivision, -guessDistribution[i] / max(mode, 1) * 12 * screenDivisionByHeight);
-        fill((gameState.mode ? 255 : 0));
+        fill(gameState.mode ? 255 : 0);
         text(guessDistribution[i], ((numScreenDivisions - 5 * (maxGuesses - 1)) / 2 + i * 5) * screenDivision, ((gameLetterSize + 39) - guessDistribution[i] / max(mode, 1) * 12) * screenDivisionByHeight);
       }
       if (gameState.games[todayIndex].dateCompleted !== undefined && gamesPlayed !== gameState.games.length) {
@@ -584,9 +584,9 @@ function createCountdownTimerGUI(millisecondsUntilNextPlayableGame, y, screenDiv
     const countdownMinutes = Math.floor((secondsUntilNextPlayableGame / 60) % 60);
     const countdownSeconds = secondsUntilNextPlayableGame % 60;
     textSize(4.5 * screenDivisionByHeight);
-    fill((gameState.mode ? 0 : 255));
+    fill(gameState.mode ? 0 : 255);
     rect(0, y - 2 * screenDivisionByHeight, width, 4.5 * screenDivisionByHeight)
-    fill((gameState.mode ? 255 : 0));
+    fill(gameState.mode ? 255 : 0);
     text(`${countdownHours.toString().padStart(2, "0")}:${countdownMinutes.toString().padStart(2, "0")}:${countdownSeconds.toString().padStart(2, "0")}`, width / 2, y);
   }
 }
@@ -604,22 +604,22 @@ function setStatsGUI(screenDivision, screenDivisionByHeight, gameLetterSize, let
   if (scaleChanged) {
     const maxScreenDivision = max(screenDivision, screenDivisionByHeight);
     darkModeButton
-      .style('color', (gameState.mode ? palette.white : palette.black))
-      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('color', gameState.mode ? palette.white : palette.black)
+      .style('background-color', gameState.mode ? palette.black : palette.white)
       .style('border-radius', (2 * screenDivision) + 'px')
       .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
       .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
       .position(displayOffset + 0 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
     contrastButton
-      .style('color', (gameState.mode ? palette.white : palette.black))
-      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('color', gameState.mode ? palette.white : palette.black)
+      .style('background-color', gameState.mode ? palette.black : palette.white)
       .style('border-radius', (2 * screenDivision) + 'px')
       .style('font-size', ((1.2 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2) + 'pt')
       .size((1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2, (3 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2) / 2)
       .position(displayOffset + 0.5 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
     statsButton
-      .style('color', (gameState.mode ? palette.white : palette.black))
-      .style('background-color', (gameState.mode ? palette.black : palette.white))
+      .style('color', gameState.mode ? palette.white : palette.black)
+      .style('background-color', gameState.mode ? palette.black : palette.white)
       .style('border-radius', (2 * screenDivision) + 'px')
       .size(1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2, 1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2)
       .position(displayOffset + width - 1 * (1.6 * gameLetterSize * screenDivision - letterSpaceMultiplier * screenDivision / 20 / 2), 0);
@@ -647,9 +647,9 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
   colorsForCopying.push([]);
   if (isWinningGuess) {
     for (let i = 0; i < wordLength; i++) {
-      colors[guessIndex][i] = (gameState.contrast ? palette.orange : palette.green);
+      colors[guessIndex][i] = gameState.contrast ? palette.orange : palette.green;
       colorsForCopying[guessIndex].push("🟩");
-      keyboardColors[qwertyKeysToIndices[guess[i]]] = (gameState.contrast ? palette.orange : palette.green);
+      keyboardColors[qwertyKeysToIndices[guess[i]]] = gameState.contrast ? palette.orange : palette.green;
     }
   }
   else {
@@ -658,24 +658,24 @@ function updateColorsForClipboardAndGUI(guess, guessIndex, isWinningGuess = fals
     const matchedIndices = [];
     for (let i = 0; i < wordLength; i++) {
       if (guess[i] === answers[todayIndex][i]) {
-        colors[guessIndex][i] = (gameState.contrast ? palette.orange : palette.green);
+        colors[guessIndex][i] = gameState.contrast ? palette.orange : palette.green;
         colorsForCopying[guessIndex].push("🟩");
-        keyboardColors[qwertyKeysToIndices[guess[i]]] = (gameState.contrast ? palette.orange : palette.green);
+        keyboardColors[qwertyKeysToIndices[guess[i]]] = gameState.contrast ? palette.orange : palette.green;
         matchedIndices.push(i);
         guessCharactersBag = guessCharactersBag.replace(guess[i], "");
         answerCharactersBag = answerCharactersBag.replace(guess[i], "");
       }
       else {
-        colors[guessIndex][i] = (gameState.mode ? color(63) : color(192));
+        colors[guessIndex][i] = gameState.mode ? color(63) : color(192);
         colorsForCopying[guessIndex].push("⬛");
       }
     }
     for (let i = 0; i < wordLength; i++) {
       if (!matchedIndices.includes(i) && answerCharactersBag.includes(guess[i])) {
-        colors[guessIndex][i] = (gameState.contrast ? palette.blue : palette.yellow);
+        colors[guessIndex][i] = gameState.contrast ? palette.blue : palette.yellow;
         colorsForCopying[guessIndex][i] = "🟨";
         if (keyboardColors[qwertyKeysToIndices[guess[i]]].toString() !== (gameState.contrast ? palette.orange : palette.green).toString()) {
-          keyboardColors[qwertyKeysToIndices[guess[i]]] = (gameState.contrast ? palette.blue : palette.yellow);
+          keyboardColors[qwertyKeysToIndices[guess[i]]] = gameState.contrast ? palette.blue : palette.yellow;
         }
         guessCharactersBag = guessCharactersBag.replace(guess[i], "");
         answerCharactersBag = answerCharactersBag.replace(guess[i], "");
@@ -718,7 +718,7 @@ function completedDaily(won) {
   gameState.games[todayIndex].dateCompleted = (new Date()).toDateString().slice(4); //it is irrelevant if the date has changed since todayIndex was last set because the purpose of dateCompleted is only ever to check whether a certain amount of time has passed
   gamesWon += won;
   gamesPlayed++;
-  currentStreak = (won ? currentStreak + 1 : 0);
+  currentStreak = won ? currentStreak + 1 : 0;
   maxStreak = max(maxStreak, currentStreak);
   determineResetPoint();
 }
@@ -898,23 +898,23 @@ function toggleDarkMode() {
   for (let i = 0; i < colors.length; i++) {
     for (let j = 0; j < colors[i].length; j++) {
       if (colors[i][j].toString() === (gameState.mode ? color(192) : color(63)).toString()) {
-        colors[i][j] = (gameState.mode ? color(63) : color(192));
+        colors[i][j] = gameState.mode ? color(63) : color(192);
       }
       else if (colors[i][j].toString() === (gameState.mode ? palette.white : palette.black).toString()) {
-        colors[i][j] = (gameState.mode ? palette.black : palette.white);
+        colors[i][j] = gameState.mode ? palette.black : palette.white;
       }
     }
   }
   darkModeButton
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white));
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white);
   contrastButton
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white));
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white);
   statsButton
-    .style('color', (gameState.mode ? palette.white : palette.black))
-    .style('background-color', (gameState.mode ? palette.black : palette.white));
-  darkModeButton.elt.innerText = (gameState.mode ? "\u263C" : "\u263E");
+    .style('color', gameState.mode ? palette.white : palette.black)
+    .style('background-color', gameState.mode ? palette.black : palette.white);
+  darkModeButton.elt.innerText = gameState.mode ? "\u263C" : "\u263E";
   statsButton.elt.src = "assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico";
 }
 
@@ -931,22 +931,22 @@ function toggleContrast() {
   for (let i = 0; i < colors.length; i++) {
     for (let j = 0; j < colors[i].length; j++) {
       if (colors[i][j].toString() === (gameState.contrast ? palette.yellow : palette.blue).toString()) {
-        colors[i][j] = (gameState.contrast ? palette.blue : palette.yellow);
+        colors[i][j] = gameState.contrast ? palette.blue : palette.yellow;
       }
       else if (colors[i][j].toString() === (gameState.contrast ? palette.green : palette.orange).toString()) {
-        colors[i][j] = (gameState.contrast ? palette.orange : palette.green);
+        colors[i][j] = gameState.contrast ? palette.orange : palette.green;
       }
     }
   }
   for (let i = 0; i < keyboardColors.length; i++) {
     if (keyboardColors[i].toString() === (gameState.contrast ? palette.yellow : palette.blue).toString()) {
-      keyboardColors[i] = (gameState.contrast ? palette.blue : palette.yellow);
+      keyboardColors[i] = gameState.contrast ? palette.blue : palette.yellow;
     }
     else if (keyboardColors[i].toString() === (gameState.contrast ? palette.green : palette.orange).toString()) {
-      keyboardColors[i] = (gameState.contrast ? palette.orange : palette.green);
+      keyboardColors[i] = gameState.contrast ? palette.orange : palette.green;
     }
   }
-  contrastButton.elt.innerText = (gameState.contrast ? "\u25D0" : "\u25D1");
+  contrastButton.elt.innerText = gameState.contrast ? "\u25D0" : "\u25D1";
 }
 
 
@@ -957,26 +957,26 @@ function toggleStats() {
   lastWindowWidth = -1; //trigger resize of elements
   lastWindowHeight = -1; //trigger resize of elements; redundant
   statsButton.elt.src = "assets/" + (stats ? (gameState.mode ? "bar_chart_inverted" : "bar_chart") : (gameState.mode ? "bar_chart_filled_inverted" : "bar_chart_filled")) + ".ico";
-  statsButton.elt.alt = (stats ? "Return to game" : "See statistics");
-  clipboardButton.style('display', (stats && gameOver ? '' : 'none'));
-  cumulativeStatsButton.style('display', (stats && gameOver ? '' : 'none'));
+  statsButton.elt.alt = stats ? "Return to game" : "See statistics";
+  clipboardButton.style('display', stats && gameOver ? '' : 'none');
+  cumulativeStatsButton.style('display', stats && gameOver ? '' : 'none');
   for (let i = 0; i < keyboard.length; i++) {
     for (let j = 0; j < keyboard[i].length; j++) {
-      keyboard[i][j].style('display', (stats ? 'none' : ''));
+      keyboard[i][j].style('display', stats ? 'none' : '');
     }
   }
-  enterButton.style('display', (stats ? 'none' : ''));
-  backspaceButton.style('display', (stats ? 'none' : ''));
+  enterButton.style('display', stats ? 'none' : '');
+  backspaceButton.style('display', stats ? 'none' : '');
 }
 
 
 function blackButtonMouseOver() {
-  this.style('background-color', color((gameState.mode ? 63 : 192)));
+  this.style('background-color', color(gameState.mode ? 63 : 192));
 }
 
 
 function blackButtonMouseOut() {
-  this.style('background-color', (gameState.mode ? palette.black : palette.white));
+  this.style('background-color', gameState.mode ? palette.black : palette.white);
 }
 
 
@@ -1025,7 +1025,7 @@ function copyDaily() {
   for (const c of colorsForCopying) {
     colorsJoined += c.join("") + "\r\n";
   }
-  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${(gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X")}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard");
+  setClipboard(`Wordle Rx  #${todayIndex + 1}  ${gameState.games[todayIndex].previousGuesses.slice(-1)[0] === answers[todayIndex] ? gameState.games[todayIndex].previousGuesses.length : "X"}/${maxGuesses}\r\nanderjef.github.io/Wordle-Rx\r\n${colorsJoined}`, "Results copied to clipboard");
 }
 
 
@@ -1043,7 +1043,7 @@ function copyStats() { //expects gamesWon !== 0
       modeTempArray[gameState.games[i].previousGuesses.length - 1]++;
     }
     else if (gameState.games[i].previousGuesses.length) {
-      scores.push((gameState.games[i].previousGuesses.length === maxGuesses ? "X" : gameState.games[i].previousGuesses.length + "+"));
+      scores.push(gameState.games[i].previousGuesses.length === maxGuesses ? "X" : gameState.games[i].previousGuesses.length + "+");
     }
     else {
       scores.push("x");
@@ -1053,7 +1053,7 @@ function copyStats() { //expects gamesWon !== 0
   mean = mean.toFixed(2);
   guessCountsSorted.sort(function (a, b) { return a - b; });
   guessCountsSorted.concat(new Array(gamesPlayed - gamesWon).fill("X"));
-  let median = (gamesPlayed ? "X" : null);
+  let median = gamesPlayed ? "X" : null;
   if (guessCountsSorted.length) {
     if (guessCountsSorted.length % 2 === 0) {
       const leftMiddle = guessCountsSorted[guessCountsSorted.length / 2 - 1];
@@ -1090,7 +1090,7 @@ function copyStats() { //expects gamesWon !== 0
       mode.push("X"); //append the count of the loss condition (if necessary)
     }
   }
-  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${(mean ? mean : "N/A")}\r\nMedian (completed): ${(median ? median : "N/A")}\r\nMode (completed): ${(mode.length ? mode : "N/A")}\r\nScores: ${scores}`, "Stats copied to clipboard!");
+  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}\r\nanderjef.github.io/Wordle-Rx\r\nID: ${gameState.ID}\r\nHash: ${hashCode(gameState.ID + "\r\n" + scores)}\r\nMax streak: ${maxStreak}\r\nMean (successful): ${mean ? mean : "N/A"}\r\nMedian (completed): ${median ? median : "N/A"}\r\nMode (completed): ${mode.length ? mode : "N/A"}\r\nScores: ${scores}`, "Stats copied to clipboard!");
 }
 
 
