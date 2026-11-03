@@ -1110,7 +1110,7 @@ function copyStats() { //expects gamesWon !== 0
       mode.push("X"); //append the count of the loss condition (if necessary)
     }
   }
-  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}${lineEnding}anderjef.github.io/Wordle-Rx${lineEnding}ID: ${gameState.ID}${lineEnding}Hash: ${hashCode(gameState.ID + lineEnding + scores)}${lineEnding}Max streak: ${maxStreak}${lineEnding}Mean (successful): ${mean ? mean : "N/A"}${lineEnding}Median (completed): ${median ? median : "N/A"}${lineEnding}Mode (completed): ${mode.length ? mode : "N/A"}${lineEnding}Scores: ${scores}`, "Stats copied to clipboard!");
+  setClipboard(`Wordle Rx  ${gamesPlayed}/${gameState.games.length}${lineEnding}anderjef.github.io/Wordle-Rx${lineEnding}ID: ${gameState.ID}${lineEnding}Hash: ${hashCode(gameState.ID + lineEnding + scores)}${lineEnding}Max streak: ${maxStreak}${lineEnding}Mean (successful): ${mean ? mean : "N/A"}${lineEnding}Median (completed): ${median ? median : "N/A"}${lineEnding}Mode (completed): ${mode.length ? mode : "N/A"}${lineEnding}Scores: ${scores}`, "Stats copied to clipboard");
 }
 
 
